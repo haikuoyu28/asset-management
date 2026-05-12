@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.AssetInfoMapper">
+
+    <resultMap type="com.ruoyi.system.domain.asset.AssetInfo" id="AssetInfoResult">
+        <id     property="id"           column="id"             />
+        <result property="assetCode"    column="asset_code"    />
+        <result property="assetName"    column="asset_name"    />
+        <result property="model"        column="model"         />
+        <result property="specification" column="specification"/>
+        <result property="configuration" column="configuration"/>
+        <result property="serialNumber" column="serial_number" />
+        <result property="assetType"    column="asset_type"    />
+        <result property="status"       column="status"        />
+        <result property="deptId"       column="dept_id"       />
+        <result property="deptName"     column="dept_name"     />
+        <result property="responsiblePerson" column="responsible_person" />
+        <result property="purchaseDate"  column="purchase_date" />
+        <result property="price"        column="price"         />
+        <result property="imageUrl"     column="image_url"     />
+        <result property="location"     column="location"      />
+        <result property="ipAddress"   column="ip_address"    />
+        <result property="macAddress"   column="mac_address"   />
+        <result property="delFlag"      column="del_flag"      />
+        <result property="remark"       column="remark"        />
+        <result property="createBy"     column="create_by"     />
+        <result property="createTime"   column="create_time"   />
+        <result property="updateBy"     column="update_by"     />
+        <result property="updateTime"   column="update_time"   />
+    </resultMap>
+
+    <sql id="selectAssetInfoVo">
+        SELECT id, asset_code, asset_name, model, specification, configuration,
+               serial_number, asset_type, status, dept_id, dept_name, responsible_person,
+               purchase_date, price, image_url, location, ip_address, mac_address,
+               del_flag, remark, create_by, create_time, update_by, update_time
+        FROM asset_info
+    </sql>
+
+    <select id="selectAssetInfoList" parameterType="com.ruoyi.system.domain.asset.AssetInfo" resultMap="AssetInfoResult">
+        <include refid="selectAssetInfoVo"/>
+        WHERE del_flag = '0'
+        <if test="assetCode != null and assetCode != ''">
+            AND asset_code LIKE CONCAT('%', #{assetCode}, '%')
+        </if>
+        <if test="assetName != null and assetName != ''">
+            AND asset_name LIKE CONCAT('%', #{assetName}, '%')
+        </if>
+        <if test="assetType != null and assetType != ''">
+            AND asset_type = #{assetType}
+        </if>
+        <if test="status != null and status != ''">
+            AND status = #{status}
+        </if>
+        <if test="deptId != null">
+            AND dept_id = #{deptId}
+        </if>
+        <if test="responsiblePerson != null and responsiblePerson != ''">
+            AND responsible_person LIKE CONCAT('%', #{responsiblePerson}, '%')
+        </if>
+        <if test="params.beginTime != null and params.beginTime != ''">
+            AND create_time &gt;= #{params.beginTime}
+        </if>
+        <if test="params.endTime != null and params.endTime != ''">
+            AND create_time &lt;= #{params.endTime}
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectAssetInfoById" parameterType="Long" resultMap="AssetInfoResult">
+        <include refid="selectAssetInfoVo"/>
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectAssetInfoByCode" parameterType="String" resultMap="AssetInfoResult">
+        <include refid="selectAssetInfoVo"/>
+        WHERE asset_code = #{assetCode}
+    </select>
+
+    <select id="checkAssetCodeUnique" resultType="int">
+        SELECT COUNT(1) FROM asset_info
+        WHERE asset_code = #{assetCode}
+        <if test="id != null and id != 0">
+            AND id != #{id}
+        </if>
+        AND del_flag = '0'
+    </select>
+
+    <insert id="insertAssetInfo" parameterType="com.ruoyi.system.domain.asset.AssetInfo" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO asset_info(
+            <if test="assetCode != null and assetCode != ''">asset_code,</if>
+            <if test="assetName != null and assetName != ''">asset_name,</if>
+            <if test="model != null">model,</if>
+            <if test="specification != null">specification,</if>
+            <if test="configuration != null">configuration,</if>
+            <if test="serialNumber != null">serial_number,</if>
+            <if test="assetType != null">asset_type,</if>
+            <if test="status != null">status,</if>
+            <if test="deptId != null">dept_id,</if>
+            <if test="deptName != null">dept_name,</if>
+            <if test="responsiblePerson != null">responsible_person,</if>
+            <if test="purchaseDate != null">purchase_date,</if>
+            <if test="price != null">price,</if>
+            <if test="imageUrl != null">image_url,</if>
+            <if test="location != null">location,</if>
+            <if test="ipAddress != null">ip_address,</if>
+            <if test="macAddress != null">mac_address,</if>
+            <if test="remark != null">remark,</if>
+            <if test="createBy != null and createBy != ''">create_by,</if>
+            create_time
+        ) VALUES (
+            <if test="assetCode != null and assetCode != ''">#{assetCode},</if>
+            <if test="assetName != null and assetName != ''">#{assetName},</if>
+            <if test="model != null">#{model},</if>
+            <if test="specification != null">#{specification},</if>
+            <if test="configuration != null">#{configuration},</if>
+            <if test="serialNumber != null">#{serialNumber},</if>
+            <if test="assetType != null">#{assetType},</if>
+            <if test="status != null">#{status},</if>
+            <if test="deptId != null">#{deptId},</if>
+            <if test="deptName != null">#{deptName},</if>
+            <if test="responsiblePerson != null">#{responsiblePerson},</if>
+            <if test="purchaseDate != null">#{purchaseDate},</if>
+            <if test="price != null">#{price},</if>
+            <if test="imageUrl != null">#{imageUrl},</if>
+            <if test="location != null">#{location},</if>
+            <if test="ipAddress != null">#{ipAddress},</if>
+            <if test="macAddress != null">#{macAddress},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="createBy != null and createBy != ''">#{createBy},</if>
+            NOW()
+        )
+    </insert>
+
+    <update id="updateAssetInfo" parameterType="com.ruoyi.system.domain.asset.AssetInfo">
+        UPDATE asset_info
+        <set>
+            <if test="assetCode != null and assetCode != ''">asset_code = #{assetCode},</if>
+            <if test="assetName != null and assetName != ''">asset_name = #{assetName},</if>
+            <if test="model != null">model = #{model},</if>
+            <if test="specification != null">specification = #{specification},</if>
+            <if test="configuration != null">configuration = #{configuration},</if>
+            <if test="serialNumber != null">serial_number = #{serialNumber},</if>
+            <if test="assetType != null">asset_type = #{assetType},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="deptName != null">dept_name = #{deptName},</if>
+            <if test="responsiblePerson != null">responsible_person = #{responsiblePerson},</if>
+            <if test="purchaseDate != null">purchase_date = #{purchaseDate},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="imageUrl != null">image_url = #{imageUrl},</if>
+            <if test="location != null">location = #{location},</if>
+            <if test="ipAddress != null">ip_address = #{ipAddress},</if>
+            <if test="macAddress != null">mac_address = #{macAddress},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteAssetInfoById" parameterType="Long">
+        UPDATE asset_info SET del_flag = '1' WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteAssetInfoByIds" parameterType="Long">
+        UPDATE asset_info SET del_flag = '1' WHERE id IN
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

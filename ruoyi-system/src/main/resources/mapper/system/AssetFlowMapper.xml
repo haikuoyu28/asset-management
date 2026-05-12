@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.AssetFlowMapper">
+
+    <resultMap type="com.ruoyi.system.domain.asset.AssetFlow" id="AssetFlowResult">
+        <id     property="id"               column="id"               />
+        <result property="assetId"          column="asset_id"         />
+        <result property="assetName"         column="asset_name"       />
+        <result property="assetCode"         column="asset_code"       />
+        <result property="flowType"          column="flow_type"        />
+        <result property="operator"          column="operator"         />
+        <result property="operateTime"       column="operate_time"     />
+        <result property="beforePerson"      column="before_person"    />
+        <result property="afterPerson"       column="after_person"     />
+        <result property="beforeStatus"      column="before_status"    />
+        <result property="afterStatus"       column="after_status"     />
+        <result property="description"      column="description"      />
+        <result property="attachment"        column="attachment"       />
+        <result property="delFlag"           column="del_flag"         />
+        <result property="remark"            column="remark"           />
+        <result property="createBy"          column="create_by"        />
+        <result property="createTime"        column="create_time"     />
+        <result property="updateBy"          column="update_by"       />
+        <result property="updateTime"        column="update_time"     />
+    </resultMap>
+
+    <sql id="selectAssetFlowVo">
+        SELECT id, asset_id, asset_name, asset_code, flow_type, operator, operate_time,
+               before_person, after_person, before_status, after_status, description,
+               attachment, del_flag, remark, create_by, create_time, update_by, update_time
+        FROM asset_flow
+    </sql>
+
+    <select id="selectAssetFlowList" parameterType="com.ruoyi.system.domain.asset.AssetFlow" resultMap="AssetFlowResult">
+        <include refid="selectAssetFlowVo"/>
+        WHERE del_flag = '0'
+        <if test="assetId != null">
+            AND asset_id = #{assetId}
+        </if>
+        <if test="assetCode != null and assetCode != ''">
+            AND asset_code LIKE CONCAT('%', #{assetCode}, '%')
+        </if>
+        <if test="flowType != null and flowType != ''">
+            AND flow_type = #{flowType}
+        </if>
+        <if test="operator != null and operator != ''">
+            AND operator LIKE CONCAT('%', #{operator}, '%')
+        </if>
+        <if test="params.beginTime != null and params.beginTime != ''">
+            AND operate_time &gt;= #{params.beginTime}
+        </if>
+        <if test="params.endTime != null and params.endTime != ''">
+            AND operate_time &lt;= #{params.endTime}
+        </if>
+        ORDER BY operate_time DESC
+    </select>
+
+    <select id="selectAssetFlowById" parameterType="Long" resultMap="AssetFlowResult">
+        <include refid="selectAssetFlowVo"/>
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectAssetFlowByAssetId" parameterType="Long" resultMap="AssetFlowResult">
+        <include refid="selectAssetFlowVo"/>
+        WHERE asset_id = #{assetId}
+        ORDER BY operate_time DESC
+    </select>
+
+    <insert id="insertAssetFlow" parameterType="com.ruoyi.system.domain.asset.AssetFlow" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO asset_flow(
+            <if test="assetId != null">asset_id,</if>
+            <if test="assetName != null">asset_name,</if>
+            <if test="assetCode != null">asset_code,</if>
+            <if test="flowType != null">flow_type,</if>
+            <if test="operator != null and operator != ''">operator,</if>
+            <if test="operateTime != null">operate_time,</if>
+            <if test="beforePerson != null">before_person,</if>
+            <if test="afterPerson != null">after_person,</if>
+            <if test="beforeStatus != null">before_status,</if>
+            <if test="afterStatus != null">after_status,</if>
+            <if test="description != null">description,</if>
+            <if test="attachment != null">attachment,</if>
+            <if test="remark != null">remark,</if>
+            <if test="createBy != null and createBy != ''">create_by,</if>
+            create_time
+        ) VALUES (
+            <if test="assetId != null">#{assetId},</if>
+            <if test="assetName != null">#{assetName},</if>
+            <if test="assetCode != null">#{assetCode},</if>
+            <if test="flowType != null">#{flowType},</if>
+            <if test="operator != null and operator != ''">#{operator},</if>
+            <if test="operateTime != null">#{operateTime},</if>
+            <if test="beforePerson != null">#{beforePerson},</if>
+            <if test="afterPerson != null">#{afterPerson},</if>
+            <if test="beforeStatus != null">#{beforeStatus},</if>
+            <if test="afterStatus != null">#{afterStatus},</if>
+            <if test="description != null">#{description},</if>
+            <if test="attachment != null">#{attachment},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="createBy != null and createBy != ''">#{createBy},</if>
+            NOW()
+        )
+    </insert>
+
+    <update id="updateAssetFlow" parameterType="com.ruoyi.system.domain.asset.AssetFlow">
+        UPDATE asset_flow
+        <set>
+            <if test="flowType != null">flow_type = #{flowType},</if>
+            <if test="operator != null">operator = #{operator},</if>
+            <if test="operateTime != null">operate_time = #{operateTime},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="attachment != null">attachment = #{attachment},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteAssetFlowById" parameterType="Long">
+        UPDATE asset_flow SET del_flag = '1' WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteAssetFlowByIds" parameterType="Long">
+        UPDATE asset_flow SET del_flag = '1' WHERE id IN
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

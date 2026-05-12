@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.MonitorAlarmMapper">
+
+    <resultMap type="com.ruoyi.system.domain.monitor.MonitorAlarm" id="MonitorAlarmResult">
+        <id     property="id"               column="id"               />
+        <result property="serverId"         column="server_id"       />
+        <result property="serverIp"         column="server_ip"       />
+        <result property="hostname"         column="hostname"        />
+        <result property="alarmType"         column="alarm_type"       />
+        <result property="alarmLevel"        column="alarm_level"      />
+        <result property="thresholdValue"    column="threshold_value"  />
+        <result property="alarmValue"        column="alarm_value"      />
+        <result property="alarmStatus"       column="alarm_status"     />
+        <result property="alarmMessage"      column="alarm_message"    />
+        <result property="alarmTime"         column="alarm_time"       />
+        <result property="handleTime"         column="handle_time"      />
+        <result property="handlePerson"       column="handle_person"   />
+        <result property="handleResult"       column="handle_result"    />
+        <result property="delFlag"           column="del_flag"         />
+        <result property="remark"             column="remark"          />
+        <result property="createBy"          column="create_by"       />
+        <result property="createTime"        column="create_time"     />
+        <result property="updateBy"          column="update_by"       />
+        <result property="updateTime"        column="update_time"     />
+    </resultMap>
+
+    <sql id="selectMonitorAlarmVo">
+        SELECT id, server_id, server_ip, hostname, alarm_type, alarm_level,
+               threshold_value, alarm_value, alarm_status, alarm_message,
+               alarm_time, handle_time, handle_person, handle_result,
+               del_flag, remark, create_by, create_time, update_by, update_time
+        FROM monitor_alarm
+    </sql>
+
+    <select id="selectMonitorAlarmList" parameterType="com.ruoyi.system.domain.monitor.MonitorAlarm" resultMap="MonitorAlarmResult">
+        <include refid="selectMonitorAlarmVo"/>
+        WHERE del_flag = '0'
+        <if test="serverId != null">
+            AND server_id = #{serverId}
+        </if>
+        <if test="serverIp != null and serverIp != ''">
+            AND server_ip LIKE CONCAT('%', #{serverIp}, '%')
+        </if>
+        <if test="alarmType != null and alarmType != ''">
+            AND alarm_type = #{alarmType}
+        </if>
+        <if test="alarmLevel != null and alarmLevel != ''">
+            AND alarm_level = #{alarmLevel}
+        </if>
+        <if test="alarmStatus != null and alarmStatus != ''">
+            AND alarm_status = #{alarmStatus}
+        </if>
+        <if test="params.beginTime != null and params.beginTime != ''">
+            AND alarm_time &gt;= #{params.beginTime}
+        </if>
+        <if test="params.endTime != null and params.endTime != ''">
+            AND alarm_time &lt;= #{params.endTime}
+        </if>
+        ORDER BY alarm_time DESC
+    </select>
+
+    <select id="selectMonitorAlarmById" parameterType="Long" resultMap="MonitorAlarmResult">
+        <include refid="selectMonitorAlarmVo"/>
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectUnhandleAlarmCount" resultType="int">
+        SELECT COUNT(1) FROM monitor_alarm
+        WHERE del_flag = '0' AND alarm_status = '0'
+    </select>
+
+    <select id="selectUnhandleAlarmList" resultMap="MonitorAlarmResult">
+        <include refid="selectMonitorAlarmVo"/>
+        WHERE del_flag = '0' AND alarm_status = '0'
+        ORDER BY alarm_level DESC, alarm_time DESC
+    </select>
+
+    <select id="checkAlarmExists" resultType="int">
+        SELECT COUNT(1) FROM monitor_alarm
+        WHERE server_id = #{serverId}
+        AND alarm_type = #{alarmType}
+        AND alarm_status IN ('0', '1')
+        AND del_flag = '0'
+    </select>
+
+    <insert id="insertMonitorAlarm" parameterType="com.ruoyi.system.domain.monitor.MonitorAlarm" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO monitor_alarm(
+            <if test="serverId != null">server_id,</if>
+            <if test="serverIp != null">server_ip,</if>
+            <if test="hostname != null">hostname,</if>
+            <if test="alarmType != null">alarm_type,</if>
+            <if test="alarmLevel != null">alarm_level,</if>
+            <if test="thresholdValue != null">threshold_value,</if>
+            <if test="alarmValue != null">alarm_value,</if>
+            <if test="alarmStatus != null">alarm_status,</if>
+            <if test="alarmMessage != null">alarm_message,</if>
+            <if test="alarmTime != null">alarm_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="createBy != null and createBy != ''">create_by,</if>
+            create_time
+        ) VALUES (
+            <if test="serverId != null">#{serverId},</if>
+            <if test="serverIp != null">#{serverIp},</if>
+            <if test="hostname != null">#{hostname},</if>
+            <if test="alarmType != null">#{alarmType},</if>
+            <if test="alarmLevel != null">#{alarmLevel},</if>
+            <if test="thresholdValue != null">#{thresholdValue},</if>
+            <if test="alarmValue != null">#{alarmValue},</if>
+            <if test="alarmStatus != null">#{alarmStatus},</if>
+            <if test="alarmMessage != null">#{alarmMessage},</if>
+            <if test="alarmTime != null">#{alarmTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="createBy != null and createBy != ''">#{createBy},</if>
+            NOW()
+        )
+    </insert>
+
+    <update id="updateMonitorAlarm" parameterType="com.ruoyi.system.domain.monitor.MonitorAlarm">
+        UPDATE monitor_alarm
+        <set>
+            <if test="alarmStatus != null">alarm_status = #{alarmStatus},</if>
+            <if test="handleTime != null">handle_time = #{handleTime},</if>
+            <if test="handlePerson != null">handle_person = #{handlePerson},</if>
+            <if test="handleResult != null">handle_result = #{handleResult},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteMonitorAlarmById" parameterType="Long">
+        UPDATE monitor_alarm SET del_flag = '1' WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteMonitorAlarmByIds" parameterType="Long">
+        UPDATE monitor_alarm SET del_flag = '1' WHERE id IN
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.MonitorServerMapper">
+
+    <resultMap type="com.ruoyi.system.domain.monitor.MonitorServer" id="MonitorServerResult">
+        <id     property="id"               column="id"               />
+        <result property="serverIp"         column="server_ip"       />
+        <result property="hostname"         column="hostname"        />
+        <result property="osName"           column="os_name"         />
+        <result property="cpuCores"         column="cpu_cores"       />
+        <result property="memoryGb"         column="memory_gb"       />
+        <result property="diskGb"           column="disk_gb"         />
+        <result property="monitorStatus"    column="monitor_status"  />
+        <result property="lastCollectTime" column="last_collect_time"/>
+        <result property="connectionStatus" column="connection_status"/>
+        <result property="sshPort"          column="ssh_port"        />
+        <result property="sshUsername"      column="ssh_username"    />
+        <result property="sshPassword"     column="ssh_password"    />
+        <result property="agentPath"        column="agent_path"      />
+        <result property="delFlag"          column="del_flag"        />
+        <result property="remark"           column="remark"          />
+        <result property="createBy"         column="create_by"       />
+        <result property="createTime"       column="create_time"     />
+        <result property="updateBy"         column="update_by"       />
+        <result property="updateTime"       column="update_time"     />
+    </resultMap>
+
+    <sql id="selectMonitorServerVo">
+        SELECT id, server_ip, hostname, os_name, cpu_cores, memory_gb, disk_gb,
+               monitor_status, last_collect_time, connection_status, ssh_port,
+               ssh_username, ssh_password, agent_path, del_flag, remark,
+               create_by, create_time, update_by, update_time
+        FROM monitor_server
+    </sql>
+
+    <select id="selectMonitorServerList" parameterType="com.ruoyi.system.domain.monitor.MonitorServer" resultMap="MonitorServerResult">
+        <include refid="selectMonitorServerVo"/>
+        WHERE del_flag = '0'
+        <if test="serverIp != null and serverIp != ''">
+            AND server_ip LIKE CONCAT('%', #{serverIp}, '%')
+        </if>
+        <if test="hostname != null and hostname != ''">
+            AND hostname LIKE CONCAT('%', #{hostname}, '%')
+        </if>
+        <if test="monitorStatus != null and monitorStatus != ''">
+            AND monitor_status = #{monitorStatus}
+        </if>
+        <if test="connectionStatus != null and connectionStatus != ''">
+            AND connection_status = #{connectionStatus}
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectMonitorServerById" parameterType="Long" resultMap="MonitorServerResult">
+        <include refid="selectMonitorServerVo"/>
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectMonitorServerByIp" parameterType="String" resultMap="MonitorServerResult">
+        <include refid="selectMonitorServerVo"/>
+        WHERE server_ip = #{serverIp}
+    </select>
+
+    <select id="selectMonitorServerOnlineList" resultMap="MonitorServerResult">
+        <include refid="selectMonitorServerVo"/>
+        WHERE del_flag = '0' AND connection_status = '0'
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="checkServerIpUnique" resultType="int">
+        SELECT COUNT(1) FROM monitor_server
+        WHERE server_ip = #{serverIp}
+        <if test="id != null and id != 0">
+            AND id != #{id}
+        </if>
+        AND del_flag = '0'
+    </select>
+
+    <insert id="insertMonitorServer" parameterType="com.ruoyi.system.domain.monitor.MonitorServer" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO monitor_server(
+            <if test="serverIp != null and serverIp != ''">server_ip,</if>
+            <if test="hostname != null and hostname != ''">hostname,</if>
+            <if test="osName != null">os_name,</if>
+            <if test="cpuCores != null">cpu_cores,</if>
+            <if test="memoryGb != null">memory_gb,</if>
+            <if test="diskGb != null">disk_gb,</if>
+            <if test="monitorStatus != null">monitor_status,</if>
+            <if test="connectionStatus != null">connection_status,</if>
+            <if test="sshPort != null">ssh_port,</if>
+            <if test="sshUsername != null">ssh_username,</if>
+            <if test="sshPassword != null">ssh_password,</if>
+            <if test="agentPath != null">agent_path,</if>
+            <if test="remark != null">remark,</if>
+            <if test="createBy != null and createBy != ''">create_by,</if>
+            create_time
+        ) VALUES (
+            <if test="serverIp != null and serverIp != ''">#{serverIp},</if>
+            <if test="hostname != null and hostname != ''">#{hostname},</if>
+            <if test="osName != null">#{osName},</if>
+            <if test="cpuCores != null">#{cpuCores},</if>
+            <if test="memoryGb != null">#{memoryGb},</if>
+            <if test="diskGb != null">#{diskGb},</if>
+            <if test="monitorStatus != null">#{monitorStatus},</if>
+            <if test="connectionStatus != null">#{connectionStatus},</if>
+            <if test="sshPort != null">#{sshPort},</if>
+            <if test="sshUsername != null">#{sshUsername},</if>
+            <if test="sshPassword != null">#{sshPassword},</if>
+            <if test="agentPath != null">#{agentPath},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="createBy != null and createBy != ''">#{createBy},</if>
+            NOW()
+        )
+    </insert>
+
+    <update id="updateMonitorServer" parameterType="com.ruoyi.system.domain.monitor.MonitorServer">
+        UPDATE monitor_server
+        <set>
+            <if test="serverIp != null and serverIp != ''">server_ip = #{serverIp},</if>
+            <if test="hostname != null">hostname = #{hostname},</if>
+            <if test="osName != null">os_name = #{osName},</if>
+            <if test="cpuCores != null">cpu_cores = #{cpuCores},</if>
+            <if test="memoryGb != null">memory_gb = #{memoryGb},</if>
+            <if test="diskGb != null">disk_gb = #{diskGb},</if>
+            <if test="monitorStatus != null">monitor_status = #{monitorStatus},</if>
+            <if test="connectionStatus != null">connection_status = #{connectionStatus},</if>
+            <if test="sshPort != null">ssh_port = #{sshPort},</if>
+            <if test="sshUsername != null">ssh_username = #{sshUsername},</if>
+            <if test="sshPassword != null">ssh_password = #{sshPassword},</if>
+            <if test="agentPath != null">agent_path = #{agentPath},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateCollectTime" parameterType="Long">
+        UPDATE monitor_server SET last_collect_time = NOW() WHERE id = #{serverId}
+    </update>
+
+    <delete id="deleteMonitorServerById" parameterType="Long">
+        UPDATE monitor_server SET del_flag = '1' WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteMonitorServerByIds" parameterType="Long">
+        UPDATE monitor_server SET del_flag = '1' WHERE id IN
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

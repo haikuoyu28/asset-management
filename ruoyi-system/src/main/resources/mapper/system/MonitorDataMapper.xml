@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.MonitorDataMapper">
+
+    <resultMap type="com.ruoyi.system.domain.monitor.MonitorData" id="MonitorDataResult">
+        <id     property="id"               column="id"               />
+        <result property="serverId"         column="server_id"       />
+        <result property="serverIp"         column="server_ip"       />
+        <result property="cpuUsage"          column="cpu_usage"        />
+        <result property="memoryUsage"       column="memory_usage"     />
+        <result property="memoryUsedGb"      column="memory_used_gb"   />
+        <result property="memoryTotalGb"     column="memory_total_gb"  />
+        <result property="diskUsage"          column="disk_usage"        />
+        <result property="diskUsedGb"         column="disk_used_gb"      />
+        <result property="diskTotalGb"       column="disk_total_gb"    />
+        <result property="networkIn"         column="network_in"       />
+        <result property="networkOut"        column="network_out"      />
+        <result property="loadAverage"       column="load_average"     />
+        <result property="runningProcesses"  column="running_processes"/>
+        <result property="collectTime"       column="collect_time"     />
+        <result property="createTime"        column="create_time"     />
+    </resultMap>
+
+    <sql id="selectMonitorDataVo">
+        SELECT id, server_id, server_ip, cpu_usage, memory_usage, memory_used_gb,
+               memory_total_gb, disk_usage, disk_used_gb, disk_total_gb,
+               network_in, network_out, load_average, running_processes,
+               collect_time, create_time
+        FROM monitor_data
+    </sql>
+
+    <select id="selectMonitorDataList" parameterType="com.ruoyi.system.domain.monitor.MonitorData" resultMap="MonitorDataResult">
+        <include refid="selectMonitorDataVo"/>
+        WHERE 1=1
+        <if test="serverId != null">
+            AND server_id = #{serverId}
+        </if>
+        <if test="serverIp != null and serverIp != ''">
+            AND server_ip LIKE CONCAT('%', #{serverIp}, '%')
+        </if>
+        <if test="params.beginTime != null and params.beginTime != ''">
+            AND collect_time &gt;= #{params.beginTime}
+        </if>
+        <if test="params.endTime != null and params.endTime != ''">
+            AND collect_time &lt;= #{params.endTime}
+        </if>
+        ORDER BY collect_time DESC
+    </select>
+
+    <select id="selectMonitorDataById" parameterType="Long" resultMap="MonitorDataResult">
+        <include refid="selectMonitorDataVo"/>
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectLatestMonitorData" parameterType="Long" resultMap="MonitorDataResult">
+        <include refid="selectMonitorDataVo"/>
+        WHERE server_id = #{serverId}
+        ORDER BY collect_time DESC
+        LIMIT 1
+    </select>
+
+    <select id="selectMonitorDataRecent" resultMap="MonitorDataResult">
+        <include refid="selectMonitorDataVo"/>
+        WHERE server_id = #{serverId}
+        ORDER BY collect_time DESC
+        LIMIT #{limit}
+    </select>
+
+    <insert id="insertMonitorData" parameterType="com.ruoyi.system.domain.monitor.MonitorData" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO monitor_data(
+            <if test="serverId != null">server_id,</if>
+            <if test="serverIp != null">server_ip,</if>
+            <if test="cpuUsage != null">cpu_usage,</if>
+            <if test="memoryUsage != null">memory_usage,</if>
+            <if test="memoryUsedGb != null">memory_used_gb,</if>
+            <if test="memoryTotalGb != null">memory_total_gb,</if>
+            <if test="diskUsage != null">disk_usage,</if>
+            <if test="diskUsedGb != null">disk_used_gb,</if>
+            <if test="diskTotalGb != null">disk_total_gb,</if>
+            <if test="networkIn != null">network_in,</if>
+            <if test="networkOut != null">network_out,</if>
+            <if test="loadAverage != null">load_average,</if>
+            <if test="runningProcesses != null">running_processes,</if>
+            <if test="collectTime != null">collect_time,</if>
+            create_time
+        ) VALUES (
+            <if test="serverId != null">#{serverId},</if>
+            <if test="serverIp != null">#{serverIp},</if>
+            <if test="cpuUsage != null">#{cpuUsage},</if>
+            <if test="memoryUsage != null">#{memoryUsage},</if>
+            <if test="memoryUsedGb != null">#{memoryUsedGb},</if>
+            <if test="memoryTotalGb != null">#{memoryTotalGb},</if>
+            <if test="diskUsage != null">#{diskUsage},</if>
+            <if test="diskUsedGb != null">#{diskUsedGb},</if>
+            <if test="diskTotalGb != null">#{diskTotalGb},</if>
+            <if test="networkIn != null">#{networkIn},</if>
+            <if test="networkOut != null">#{networkOut},</if>
+            <if test="loadAverage != null">#{loadAverage},</if>
+            <if test="runningProcesses != null">#{runningProcesses},</if>
+            <if test="collectTime != null">#{collectTime},</if>
+            NOW()
+        )
+    </insert>
+
+    <delete id="deleteMonitorDataById" parameterType="Long">
+        DELETE FROM monitor_data WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteMonitorDataByIds" parameterType="Long">
+        DELETE FROM monitor_data WHERE id IN
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <delete id="deleteExpiredData">
+        DELETE FROM monitor_data WHERE collect_time &lt; DATE_SUB(NOW(), INTERVAL 7 DAY)
+    </delete>
+
+</mapper>
