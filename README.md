@@ -1,363 +1,309 @@
-# 企业IT设备与服务器资产管理平台
+# 企业 IT 设备与服务器资产管理平台
 
-<div align="center">
+基于 RuoYi-Vue 二次开发的企业 IT 资产管理系统，面向设备台账、资产流转、服务器监控、系统权限和运维基础数据管理等场景。
 
-**基于若依框架开发的企业后台管理系统**
+## 项目状态
 
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.0-green.svg)](https://spring.io/projects/spring-boot)
-[![Vue](https://img.shields.io/badge/Vue-3.4-blue.svg)](https://vuejs.org/)
-[![MySQL](https://img.shields.io/badge/MySQL-8.0-orange.svg)](https://www.mysql.com/)
-[![Redis](https://img.shields.io/badge/Redis-7.0-red.svg)](https://redis.io/)
+当前仓库已经补充 Docker 部署配置，并在 Windows + Docker Desktop 环境下完成验证。
 
-</div>
+已验证服务：
 
----
+| 服务 | 容器名 | 默认访问 |
+| --- | --- | --- |
+| 前端 Nginx | `asset-frontend` | http://localhost |
+| 后端服务 | `asset-backend` | http://localhost:8080 |
+| MySQL | `asset-mysql` | localhost:3307 |
+| Redis | `asset-redis` | localhost:6379 |
 
-## 📋 项目简介
+说明：MySQL 容器内部端口仍是 `3306`，宿主机默认映射到 `3307`，用于避开本机已有 MySQL 的 `3306` 端口占用。
 
-本系统是基于 **RuoYi-Vue** 框架开发的企业级IT设备与服务器资产管理平台，旨在解决企业IT资产管理混乱、审批流程不规范、设备维护不及时等痛点。
+## 技术栈
 
-系统涵盖 **6大核心业务模块**，实现从设备采购入库、领用审批、日常维护到报废处置的全生命周期管理。
+### 后端
 
-### 适用场景
-- 中小企业IT资产管理工作
-- 计算机运维部门设备台账管理
-- 办公用品申领与审批流程
-- 运维工单管理与跟踪
+| 技术 | 版本 / 说明 |
+| --- | --- |
+| Java | 17 |
+| Spring Boot | 4.0.3 |
+| RuoYi | 3.9.2 |
+| MyBatis / MyBatis Spring Boot | MyBatis 体系 |
+| Druid | 数据库连接池 |
+| MySQL | 8.0 |
+| Redis | 7-alpine |
+| Quartz | 定时任务 |
+| Spring Security | 权限认证 |
 
----
+### 前端
 
-## 🏗️ 技术架构
+| 技术 | 版本 / 说明 |
+| --- | --- |
+| Vue | 2.6.12 |
+| Element UI | 2.15.14 |
+| Vue Router | 3.4.9 |
+| Vuex | 3.6.0 |
+| Axios | 0.30.3 |
+| Vue CLI | 4.4.6 |
 
-### 后端技术栈
-| 技术 | 版本 | 说明 |
-|------|------|------|
-| Spring Boot | 3.2.0 | 核心框架 |
-| MyBatis-Plus | 3.5.5 | ORM框架 |
-| MySQL | 8.0+ | 数据库 |
-| Redis | 7.0+ | 缓存数据库 |
-| Spring Security | 6.2.0 | 安全框架 |
-| JJWT | 0.12.3 | Token认证 |
-| Druid | 1.2.20 | 数据库连接池 |
-| Swagger | 3.0.0 | API文档 |
+## 功能模块
 
-### 前端技术栈
-| 技术 | 版本 | 说明 |
-|------|------|------|
-| Vue | 3.4+ | 前端框架 |
-| Element Plus | 2.5+ | UI组件库 |
-| Vue Router | 4.2+ | 路由管理 |
-| Pinia | 2.1+ | 状态管理 |
-| Axios | 1.6+ | HTTP客户端 |
-| Vite | 5.0+ | 构建工具 |
+- 系统管理：用户、角色、菜单、部门、岗位、字典、参数配置。
+- 权限认证：登录认证、角色权限、菜单权限、接口权限控制。
+- 资产管理：设备资产信息、资产状态、资产流转记录。
+- 服务器监控：服务器信息、监控数据、告警记录。
+- 定时任务：基于 Quartz 的任务配置与执行。
+- 日志审计：登录日志、操作日志。
+- 代码生成：沿用 RuoYi 代码生成能力。
 
-### 开发环境
-- **JDK**: 21
-- **Maven**: 3.9.15
-- **Node.js**: 22.22.1
-- **IDE**: IntelliJ IDEA 2024.1
-- **OS**: Windows 10 / Linux
+## 目录结构
 
----
-
-## 🎯 功能模块
-
-### 1️⃣ 材料审批模块
-- 采购申请提交与审批
-- 多级审批流程（申请人 → 部门主管 → 总经理）
-- 审批记录查询与统计
-- 审批意见与驳回原因记录
-
-### 2️⃣ 资产管理模块
-- IT设备信息录入（电脑、服务器、网络设备等）
-- 设备状态管理（正常 / 维修中 / 报废）
-- 资产调拨与归还
-- 资产盘点与统计报表
-
-### 3️⃣ 办公用品申领模块
-- 办公用品库存管理
-- 领用申请与审批
-- 领用记录查询
-- 库存预警提醒
-
-### 4️⃣ 公告管理模块
-- 公告发布与编辑
-- 公告分类（通知 / 新闻 / 制度）
-- 公告阅读状态跟踪
-- 附件上传与下载
-
-### 5️⃣ 运维工单模块
-- 故障报修工单创建
-- 工单分配与处理
-- 工单进度跟踪
-- 工单满意度评价
-
-### 6️⃣ 设备管理模块
-- 服务器信息管理
-- 设备监控数据采集
-- 维护计划与记录
-- 设备生命周期管理
-
----
-
-## 🚀 快速开始
-
-### 环境准备
-
-1. **安装依赖环境**
-   ```bash
-   # 检查 Java 版本
-   java -version  # 需要 JDK 21+
-   
-   # 检查 Maven
-   mvn -version   # 需要 3.9+
-   
-   # 检查 Node.js
-   node -v        # 需要 22.22.1+
-   ```
-
-2. **初始化数据库**
-   ```bash
-   # 创建数据库
-   mysql -u root -p
-   CREATE DATABASE `asset-management` DEFAULT CHARSET utf8mb4 COLLATE utf8mb4_general_ci;
-   
-   # 导入表结构与数据
-   use `asset-management`;
-   source D:/Ruoyiproject/RuoYi-Vue-master/sql/ry_2024xxxx.sql
-   ```
-
-3. **配置 Redis**
-   ```bash
-   # Windows 启动 Redis
-   cd D:/Redis
-   redis-server redis.windows.conf
-   
-   # 测试连接
-   redis-cli ping  # 应返回 PONG
-   ```
-
----
-
-### 后端启动
-
-```bash
-# 1. 进入项目目录
-cd D:/Ruoyiproject/RuoYi-Vue-master
-
-# 2. 修改配置文件
-# 编辑 ruoyi-admin/src/main/resources/application.yml
-# 修改数据库连接信息
-
-# 3. 编译项目
-mvn clean install -DskipTests
-
-# 4. 启动后端服务
-cd ruoyi-admin
-mvn spring-boot:run
-
-# 或者运行打包后的 jar
-java -jar target/ruoyi-admin.jar
-```
-
-**验证后端启动成功：**
-- 访问 http://localhost:8080
-- 看到若依登录页面即成功
-
----
-
-### 前端启动
-
-```bash
-# 1. 进入前端目录
-cd D:/Ruoyiproject/RuoYi-Vue-master/ruoyi-ui
-
-# 2. 安装依赖
-npm install --registry=https://registry.npmmirror.com
-
-# 3. 启动开发服务器
-npm run dev
-
-# 4. 构建生产环境
-npm run build:prod
-```
-
-**验证前端启动成功：**
-- 自动打开浏览器 http://localhost:80
-- 看到登录页面即成功
-
----
-
-## 📂 项目结构
-
-```
-RuoYi-Vue-master/
-├── ruoyi-admin/          # 后台服务模块（启动类所在）
+```text
+asset-management/
+├── ruoyi-admin/          # 后端启动模块
 ├── ruoyi-common/         # 通用工具模块
 ├── ruoyi-framework/      # 框架核心模块
-├── ruoyi-system/         # 系统管理模块
-├── ruoyi-ui/             # 前端Vue项目
-├── sql/                  # 数据库脚本
-├── doc/                  # 项目文档
-└── README.md             # 项目说明文档
+├── ruoyi-generator/      # 代码生成模块
+├── ruoyi-quartz/         # 定时任务模块
+├── ruoyi-system/         # 系统业务模块
+├── ruoyi-ui/             # Vue 2 前端项目
+├── sql/                  # 数据库初始化脚本
+├── docker/               # Nginx 配置和运行数据目录
+├── docker-compose.yml    # Docker Compose 编排文件
+├── Dockerfile.backend    # 后端运行镜像
+├── Dockerfile.frontend   # 前端 Nginx 镜像
+├── DOCKER_USAGE.md       # Docker 后续使用说明
+└── DEPLOYMENT_GUIDE.md   # 部署说明文档
 ```
 
----
+## 快速启动：Docker
 
-## 🔧 配置说明
-
-### 后端配置（application.yml）
-
-```yaml
-# 数据库配置
-spring:
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/asset-management?useUnicode=true&characterEncoding=utf8
-    username: root
-    password: 123456
-
-# Redis配置
-  redis:
-    host: 127.0.0.1
-    port: 6379
-    password:
-    database: 0
-
-# 端口配置
-server:
-  port: 8080
-```
-
-### 前端配置（vue.config.js）
-
-```javascript
-module.exports = {
-  devServer: {
-    host: '0.0.0.0',
-    port: 80,
-    proxy: {
-      '/dev-api': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-        pathRewrite: { '^/dev-api': '' }
-      }
-    }
-  }
-}
-```
-
----
-
-## 📊 核心功能展示
-
-### 资产管理流程
-
-```
-┌─────────────┐
-│  设备采购入库  │
-└──────┬──────┘
-       │
-       ▼
-┌─────────────┐
-│  资产信息录入  │
-└──────┬──────┘
-       │
-       ▼
-┌─────────────┐
-│  分配与领用   │ ← 需要审批
-└──────┬──────┘
-       │
-       ▼
-┌─────────────┐
-│  日常维护    │
-└──────┬──────┘
-       │
-       ▼
-┌─────────────┐
-│  报废处置    │ ← 需要审批
-└─────────────┘
-```
-
----
-
-## 🛠️ 开发指南
-
-### 新增业务模块步骤
-
-1. **设计数据库表**
-   ```sql
-   CREATE TABLE asset (
-     asset_id BIGINT PRIMARY KEY AUTO_INCREMENT,
-     asset_name VARCHAR(100) NOT NULL,
-     ...
-   );
-   ```
-
-2. **使用代码生成器**
-   - 进入系统：`系统工具 → 代码生成`
-   - 导入数据表
-   - 编辑字段信息
-   - 生成前后端代码
-
-3. **导入生成代码**
-   - 将生成的Java代码放入 `ruoyi-system` 模块
-   - 将生成的前端代码放入 `ruoyi-ui/src/views`
-
-4. **配置菜单权限**
-   - 进入系统：`系统管理 → 菜单管理`
-   - 新增菜单项
-   - 分配权限给角色
-
----
-
-## 📝 部署指南
-
-### 后端部署（jar包方式）
+### 1. 克隆项目
 
 ```bash
-# 1. 打包
-cd D:/Ruoyiproject/RuoYi-Vue-master
+git clone https://github.com/haikuoyu28/asset-management.git
+cd asset-management
+```
+
+### 2. 准备构建产物
+
+当前 Dockerfile 使用运行时镜像，要求本地已经存在：
+
+```text
+ruoyi-admin/target/ruoyi-admin.jar
+ruoyi-ui/dist/
+```
+
+如果是全新克隆，先构建后端：
+
+```bash
 mvn clean package -DskipTests
-
-# 2. 上传 jar 包到服务器
-scp ruoyi-admin/target/ruoyi-admin.jar user@server:/app/
-
-# 3. 后台运行
-nohup java -jar ruoyi-admin.jar > app.log 2>&1 &
 ```
 
-### 前端部署（Nginx）
+再构建前端：
 
 ```bash
-# 1. 构建生产版本
 cd ruoyi-ui
+npm install --registry=https://registry.npmmirror.com
 npm run build:prod
-
-# 2. 上传 dist 目录到服务器
-scp -r dist/* user@server:/var/www/html/
-
-# 3. Nginx 配置
-server {
-    listen 80;
-    server_name your-domain.com;
-    root /var/www/html;
-    index index.html;
-}
+cd ..
 ```
 
----
+### 3. 启动服务
 
-## 👤 默认账号
+```bash
+docker compose up -d --build
+```
 
-| 用户名 | 密码 | 权限 |
-|--------|------|------|
-| admin | admin123 | 超级管理员 |
-| ry | admin123 | 普通用户 |
+启动完成后访问：
 
----
+```text
+http://localhost
+```
 
+### 4. 查看状态
 
+```bash
+docker compose ps
+```
 
+查看后端日志：
 
+```bash
+docker compose logs -f backend
+```
 
+停止服务：
+
+```bash
+docker compose down
+```
+
+## 环境变量
+
+仓库包含默认 `.env`：
+
+```env
+MYSQL_PORT=3307
+```
+
+可按需增加：
+
+```env
+FRONTEND_PORT=8081
+BACKEND_PORT=8082
+MYSQL_ROOT_PASSWORD=123456
+MYSQL_DATABASE=ry_cloud
+REDIS_PASSWORD=
+```
+
+修改端口后重新启动：
+
+```bash
+docker compose up -d
+```
+
+## 数据库初始化
+
+首次启动 MySQL 容器时会自动创建数据库并执行：
+
+```text
+sql/ry_20260417.sql
+sql/quartz.sql
+sql/asset_monitor_tables.sql
+sql/system_init.sql
+```
+
+首次初始化期间，后端可能短暂出现 MySQL `Connection refused` 日志。这通常是 MySQL 还在初始化，等待容器自动重启恢复即可。
+
+数据目录：
+
+| 目录 | 说明 |
+| --- | --- |
+| `docker/mysql/data/` | MySQL 数据 |
+| `docker/redis/data/` | Redis 数据 |
+| `docker/uploadPath/` | 后端上传文件 |
+
+这些目录已被 `.gitignore` 排除，不会提交到仓库。
+
+## Docker Hub 拉取失败处理
+
+如果构建时出现：
+
+```text
+failed to fetch oauth token
+failed to authorize
+```
+
+可以先通过镜像代理拉取基础镜像：
+
+```bash
+docker pull m.daocloud.io/docker.io/library/nginx:1.25-alpine
+docker pull m.daocloud.io/docker.io/library/eclipse-temurin:17-jre
+
+docker tag m.daocloud.io/docker.io/library/nginx:1.25-alpine nginx:1.25-alpine
+docker tag m.daocloud.io/docker.io/library/eclipse-temurin:17-jre eclipse-temurin:17-jre
+```
+
+然后重新启动：
+
+```bash
+docker compose up -d --build
+```
+
+## 本地开发启动
+
+### 后端
+
+确保本机已启动 MySQL 和 Redis，并导入 `sql/` 下的初始化脚本。
+
+默认配置支持环境变量覆盖：
+
+```bash
+MYSQL_HOST=localhost
+MYSQL_PORT=3306
+MYSQL_DATABASE=ry_cloud
+MYSQL_USERNAME=root
+MYSQL_PASSWORD=123456
+REDIS_HOST=localhost
+REDIS_PORT=6379
+```
+
+启动后端：
+
+```bash
+mvn clean package -DskipTests
+java -jar ruoyi-admin/target/ruoyi-admin.jar
+```
+
+### 前端
+
+```bash
+cd ruoyi-ui
+npm install --registry=https://registry.npmmirror.com
+npm run dev
+```
+
+生产构建：
+
+```bash
+npm run build:prod
+```
+
+## 常见问题
+
+### 端口被占用
+
+Windows 下可检查常用端口：
+
+```powershell
+Get-NetTCPConnection -State Listen |
+  Where-Object { $_.LocalPort -in 80,8080,3306,3307,6379 } |
+  Select-Object LocalAddress,LocalPort,OwningProcess
+```
+
+如果 `80` 被占用，在 `.env` 中设置：
+
+```env
+FRONTEND_PORT=8081
+```
+
+如果 `8080` 被占用，在 `.env` 中设置：
+
+```env
+BACKEND_PORT=8082
+```
+
+### 重新初始化数据库
+
+先停止服务：
+
+```bash
+docker compose down
+```
+
+再清理 `docker/mysql/data/` 后重新启动。清理前请确认没有需要保留的数据。
+
+### 后端启动后无法连接数据库
+
+检查 MySQL 容器状态：
+
+```bash
+docker compose ps
+docker compose logs -f mysql
+```
+
+确认日志中出现 MySQL ready 后，再查看后端：
+
+```bash
+docker compose logs -f backend
+```
+
+## 默认账号
+
+| 用户名 | 密码 | 说明 |
+| --- | --- | --- |
+| `admin` | `admin123` | 超级管理员 |
+
+## 更多文档
+
+- Docker 后续使用说明：[DOCKER_USAGE.md](DOCKER_USAGE.md)
+- 原部署说明：[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
