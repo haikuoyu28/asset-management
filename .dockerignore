@@ -1,0 +1,9 @@
+.git
+.github
+.idea
+docker/mysql/data
+docker/redis/data
+docker/uploadPath
+ruoyi-ui/node_modules
+**/.DS_Store
+*.log
