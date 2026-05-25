@@ -1,0 +1,69 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: asset-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-ry_cloud}
+      TZ: Asia/Shanghai
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - ./docker/mysql/data:/var/lib/mysql
+      - ./sql/ry_20260417.sql:/docker-entrypoint-initdb.d/01-ry.sql:ro
+      - ./sql/quartz.sql:/docker-entrypoint-initdb.d/02-quartz.sql:ro
+      - ./sql/asset_monitor_tables.sql:/docker-entrypoint-initdb.d/03-asset-monitor.sql:ro
+      - ./sql/system_init.sql:/docker-entrypoint-initdb.d/04-system-init.sql:ro
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+      - --default-time-zone=+08:00
+
+  redis:
+    image: redis:7-alpine
+    container_name: asset-redis
+    restart: always
+    environment:
+      TZ: Asia/Shanghai
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - ./docker/redis/data:/data
+    command: redis-server --appendonly yes
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: asset-backend
+    restart: always
+    depends_on:
+      - mysql
+      - redis
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-ry_cloud}
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      RUOYI_PROFILE: /home/ruoyi/uploadPath
+      TZ: Asia/Shanghai
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    volumes:
+      - ./docker/uploadPath:/home/ruoyi/uploadPath
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: asset-frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-80}:80"

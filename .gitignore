@@ -45,3 +45,10 @@ nbdist/
 !*/build/*.java
 !*/build/*.html
 !*/build/*.xml
+
+######################################################################
+# Docker runtime data
+
+docker/mysql/data/
+docker/redis/data/
+docker/uploadPath/
