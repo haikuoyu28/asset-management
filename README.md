@@ -303,7 +303,3 @@ docker compose logs -f backend
 | --- | --- | --- |
 | `admin` | `admin123` | 超级管理员 |
 
-## 更多文档
-
-- Docker 后续使用说明：[DOCKER_USAGE.md](DOCKER_USAGE.md)
-- 原部署说明：[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
