@@ -70,9 +70,7 @@ asset-management/
 ├── docker-compose.yml    # Docker Compose 编排文件
 ├── Dockerfile.backend    # 后端运行镜像
 ├── Dockerfile.frontend   # 前端 Nginx 镜像
-├── DOCKER_USAGE.md       # Docker 后续使用说明
-└── DEPLOYMENT_GUIDE.md   # 部署说明文档
-```
+
 
 ## 快速启动：Docker
 
