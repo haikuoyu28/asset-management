@@ -4,6 +4,9 @@
 .gradle
 /build/
 !gradle/wrapper/gradle-wrapper.jar
+node_modules/
+ruoyi-ui/dist/
+ruoyi-ui-vue3/dist/
 
 target/
 !.mvn/wrapper/maven-wrapper.jar
