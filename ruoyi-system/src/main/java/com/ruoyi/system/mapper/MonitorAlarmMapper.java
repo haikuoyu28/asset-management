@@ -28,4 +28,7 @@ public interface MonitorAlarmMapper {
     public int deleteMonitorAlarmByIds(Long[] ids);
 
     public int checkAlarmExists(@Param("serverId") Long serverId, @Param("alarmType") String alarmType);
+
+    public int recoverActiveAlarm(@Param("serverId") Long serverId, @Param("alarmType") String alarmType,
+            @Param("handleResult") String handleResult);
 }

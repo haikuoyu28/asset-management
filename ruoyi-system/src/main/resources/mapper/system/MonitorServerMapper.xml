@@ -172,6 +172,24 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         WHERE id = #{serverId}
     </update>
 
+    <select id="selectAgentHeartbeatTimeoutList" resultMap="MonitorServerResult">
+        <include refid="selectMonitorServerVo"/>
+        WHERE ms.del_flag = '0'
+          AND ms.agent_enabled = '0'
+          AND ms.connection_status = '0'
+          AND (ms.last_collect_time IS NULL OR ms.last_collect_time &lt; DATE_SUB(NOW(), INTERVAL #{timeoutMinutes} MINUTE))
+        ORDER BY ms.last_collect_time ASC
+    </select>
+
+    <update id="updateAgentOffline" parameterType="Long">
+        UPDATE monitor_server
+        SET connection_status = '1',
+            monitor_status = '1',
+            update_time = NOW()
+        WHERE id = #{serverId}
+          AND del_flag = '0'
+    </update>
+
     <update id="updateAgentToken">
         UPDATE monitor_server
         SET agent_token = #{agentToken},

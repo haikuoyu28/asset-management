@@ -2,7 +2,9 @@ package com.ruoyi.system.service.impl;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -136,12 +138,14 @@ public class MonitorDataServiceImpl implements IMonitorDataService {
         monitorDataMapper.insertMonitorData(monitorData);
 
         boolean abnormal = evaluateRules(server, monitorData);
+        recoverServiceAlarm(server);
         monitorServerMapper.updateCollectStatus(server.getId(), abnormal ? "1" : "0", "0", monitorData.getCollectTime());
         return monitorData;
     }
 
     private boolean evaluateRules(MonitorServer server, MonitorData data) {
         boolean abnormal = false;
+        Set<String> abnormalTypes = new HashSet<>();
         List<MonitorAlarmRule> rules = monitorAlarmRuleMapper.selectEnabledRules(server.getId());
         for (MonitorAlarmRule rule : rules) {
             BigDecimal value = metricValue(rule.getAlarmType(), data);
@@ -150,7 +154,14 @@ public class MonitorDataServiceImpl implements IMonitorDataService {
             }
             if (matches(rule.getCompareOperator(), value, rule.getThresholdValue())) {
                 abnormal = true;
+                abnormalTypes.add(rule.getAlarmType());
                 createAlarmIfNeeded(server, data, rule, value);
+            }
+        }
+        for (MonitorAlarmRule rule : rules) {
+            BigDecimal value = metricValue(rule.getAlarmType(), data);
+            if (value != null && !abnormalTypes.contains(rule.getAlarmType())) {
+                recoverMetricAlarm(server, rule, value);
             }
         }
         return abnormal;
@@ -203,6 +214,19 @@ public class MonitorDataServiceImpl implements IMonitorDataService {
         alarm.setAlarmTime(data.getCollectTime());
         alarm.setCreateBy("system");
         monitorAlarmMapper.insertMonitorAlarm(alarm);
+    }
+
+    private void recoverMetricAlarm(MonitorServer server, MonitorAlarmRule rule, BigDecimal value) {
+        String result = String.format("指标恢复正常：%s当前值 %s%%，未触发阈值 %s%s%%",
+                metricName(rule.getAlarmType()),
+                value,
+                rule.getCompareOperator(),
+                rule.getThresholdValue());
+        monitorAlarmMapper.recoverActiveAlarm(server.getId(), rule.getAlarmType(), result);
+    }
+
+    private void recoverServiceAlarm(MonitorServer server) {
+        monitorAlarmMapper.recoverActiveAlarm(server.getId(), "5", "Agent 已恢复上报，服务器连接状态恢复在线");
     }
 
     private String buildAlarmMessage(MonitorServer server, MonitorAlarmRule rule, BigDecimal value) {

@@ -2,9 +2,13 @@ package com.ruoyi.system.service.impl;
 
 import java.util.List;
 import java.util.UUID;
+import java.math.BigDecimal;
+import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.ruoyi.system.domain.monitor.MonitorAlarm;
+import com.ruoyi.system.mapper.MonitorAlarmMapper;
 import com.ruoyi.system.mapper.MonitorServerMapper;
 import com.ruoyi.system.domain.monitor.MonitorServer;
 import com.ruoyi.system.service.IMonitorServerService;
@@ -22,6 +26,9 @@ public class MonitorServerServiceImpl implements IMonitorServerService {
 
     @Autowired
     private MonitorServerMapper monitorServerMapper;
+
+    @Autowired
+    private MonitorAlarmMapper monitorAlarmMapper;
 
     @Override
     public MonitorServer selectMonitorServerById(Long id) {
@@ -90,6 +97,18 @@ public class MonitorServerServiceImpl implements IMonitorServerService {
 
     @Override
     @Transactional
+    public int checkAgentHeartbeatTimeout(int timeoutMinutes) {
+        int timeout = timeoutMinutes <= 0 ? 3 : timeoutMinutes;
+        List<MonitorServer> servers = monitorServerMapper.selectAgentHeartbeatTimeoutList(timeout);
+        for (MonitorServer server : servers) {
+            monitorServerMapper.updateAgentOffline(server.getId());
+            createOfflineAlarmIfNeeded(server, timeout);
+        }
+        return servers.size();
+    }
+
+    @Override
+    @Transactional
     public int deleteMonitorServerById(Long id) {
         return monitorServerMapper.deleteMonitorServerById(id);
     }
@@ -108,5 +127,24 @@ public class MonitorServerServiceImpl implements IMonitorServerService {
             return false;
         }
         return true;
+    }
+
+    private void createOfflineAlarmIfNeeded(MonitorServer server, int timeoutMinutes) {
+        if (monitorAlarmMapper.checkAlarmExists(server.getId(), "5") > 0) {
+            return;
+        }
+        MonitorAlarm alarm = new MonitorAlarm();
+        alarm.setServerId(server.getId());
+        alarm.setServerIp(server.getServerIp());
+        alarm.setHostname(server.getHostname());
+        alarm.setAlarmType("5");
+        alarm.setAlarmLevel("3");
+        alarm.setThresholdValue(new BigDecimal(timeoutMinutes));
+        alarm.setAlarmValue(new BigDecimal(timeoutMinutes));
+        alarm.setAlarmStatus("0");
+        alarm.setAlarmMessage(StringUtils.format("Agent心跳超时超过{}分钟，服务器已标记离线", timeoutMinutes));
+        alarm.setAlarmTime(new Date());
+        alarm.setCreateBy("system");
+        monitorAlarmMapper.insertMonitorAlarm(alarm);
     }
 }

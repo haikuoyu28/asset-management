@@ -86,6 +86,20 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         AND del_flag = '0'
     </select>
 
+    <update id="recoverActiveAlarm">
+        UPDATE monitor_alarm
+        SET alarm_status = '2',
+            handle_time = NOW(),
+            handle_person = 'system',
+            handle_result = #{handleResult},
+            update_by = 'system',
+            update_time = NOW()
+        WHERE server_id = #{serverId}
+          AND alarm_type = #{alarmType}
+          AND alarm_status IN ('0', '1')
+          AND del_flag = '0'
+    </update>
+
     <insert id="insertMonitorAlarm" parameterType="com.ruoyi.system.domain.monitor.MonitorAlarm" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO monitor_alarm(
             <if test="serverId != null">server_id,</if>

@@ -24,6 +24,8 @@ public interface IMonitorServerService {
 
     public MonitorServer resetAgentToken(Long id);
 
+    public int checkAgentHeartbeatTimeout(int timeoutMinutes);
+
     public int deleteMonitorServerById(Long id);
 
     public int deleteMonitorServerByIds(Long[] ids);
