@@ -43,6 +43,7 @@ public class MonitorServerServiceImpl implements IMonitorServerService {
         if (!checkServerIpUnique(monitorServer)) {
             throw new ServiceException("服务器IP已存在");
         }
+        monitorServer.setSshPassword(null);
         monitorServer.setCreateBy(SecurityUtils.getUsername());
         return monitorServerMapper.insertMonitorServer(monitorServer);
     }
@@ -53,6 +54,7 @@ public class MonitorServerServiceImpl implements IMonitorServerService {
         if (!checkServerIpUnique(monitorServer)) {
             throw new ServiceException("服务器IP已存在");
         }
+        monitorServer.setSshPassword(null);
         monitorServer.setUpdateBy(SecurityUtils.getUsername());
         return monitorServerMapper.updateMonitorServer(monitorServer);
     }

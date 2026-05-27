@@ -14,6 +14,9 @@ public class MonitorServer extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     private Long id;
+    private Long assetId;
+    private String assetCode;
+    private String assetName;
     private String serverIp;
     private String hostname;
     private String osName;
@@ -37,6 +40,30 @@ public class MonitorServer extends BaseEntity {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(Long assetId) {
+        this.assetId = assetId;
+    }
+
+    public String getAssetCode() {
+        return assetCode;
+    }
+
+    public void setAssetCode(String assetCode) {
+        this.assetCode = assetCode;
+    }
+
+    public String getAssetName() {
+        return assetName;
+    }
+
+    public void setAssetName(String assetName) {
+        this.assetName = assetName;
     }
 
     public String getServerIp() {

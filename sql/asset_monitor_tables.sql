@@ -82,6 +82,7 @@ CREATE TABLE `asset_flow` (
 DROP TABLE IF EXISTS `monitor_server`;
 CREATE TABLE `monitor_server` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '服务器ID',
+  `asset_id` bigint DEFAULT NULL COMMENT '关联资产ID',
   `server_ip` varchar(64) NOT NULL COMMENT '服务器IP',
   `hostname` varchar(128) NOT NULL COMMENT '主机名',
   `os_name` varchar(128) DEFAULT NULL COMMENT '操作系统',
@@ -93,7 +94,7 @@ CREATE TABLE `monitor_server` (
   `connection_status` char(1) NOT NULL DEFAULT '0' COMMENT '连接状态（0在线 1离线）',
   `ssh_port` int DEFAULT 22 COMMENT 'SSH端口',
   `ssh_username` varchar(64) DEFAULT NULL COMMENT 'SSH用户名',
-  `ssh_password` varchar(256) DEFAULT NULL COMMENT 'SSH密码（加密存储）',
+  `ssh_password` varchar(256) DEFAULT NULL COMMENT 'SSH密码（保留兼容，当前版本不保存）',
   `agent_path` varchar(256) DEFAULT NULL COMMENT 'Agent路径',
   `remark` varchar(512) DEFAULT NULL COMMENT '备注',
   `del_flag` char(1) NOT NULL DEFAULT '0' COMMENT '删除标志（0存在 1删除）',
@@ -103,6 +104,7 @@ CREATE TABLE `monitor_server` (
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_server_ip` (`server_ip`),
+  KEY `idx_asset_id` (`asset_id`),
   KEY `idx_monitor_status` (`monitor_status`),
   KEY `idx_connection_status` (`connection_status`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='监控服务器表';

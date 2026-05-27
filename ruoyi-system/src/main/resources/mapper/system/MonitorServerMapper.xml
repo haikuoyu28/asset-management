@@ -6,6 +6,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <resultMap type="com.ruoyi.system.domain.monitor.MonitorServer" id="MonitorServerResult">
         <id     property="id"               column="id"               />
+        <result property="assetId"          column="asset_id"         />
+        <result property="assetCode"        column="asset_code"       />
+        <result property="assetName"        column="asset_name"       />
         <result property="serverIp"         column="server_ip"       />
         <result property="hostname"         column="hostname"        />
         <result property="osName"           column="os_name"         />
@@ -17,7 +20,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="connectionStatus" column="connection_status"/>
         <result property="sshPort"          column="ssh_port"        />
         <result property="sshUsername"      column="ssh_username"    />
-        <result property="sshPassword"     column="ssh_password"    />
         <result property="agentPath"        column="agent_path"      />
         <result property="delFlag"          column="del_flag"        />
         <result property="remark"           column="remark"          />
@@ -28,45 +30,50 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectMonitorServerVo">
-        SELECT id, server_ip, hostname, os_name, cpu_cores, memory_gb, disk_gb,
-               monitor_status, last_collect_time, connection_status, ssh_port,
-               ssh_username, ssh_password, agent_path, del_flag, remark,
-               create_by, create_time, update_by, update_time
-        FROM monitor_server
+        SELECT ms.id, ms.asset_id, ai.asset_code, ai.asset_name,
+               ms.server_ip, ms.hostname, ms.os_name, ms.cpu_cores, ms.memory_gb, ms.disk_gb,
+               ms.monitor_status, ms.last_collect_time, ms.connection_status, ms.ssh_port,
+               ms.ssh_username, ms.agent_path, ms.del_flag, ms.remark,
+               ms.create_by, ms.create_time, ms.update_by, ms.update_time
+        FROM monitor_server ms
+        LEFT JOIN asset_info ai ON ai.id = ms.asset_id AND ai.del_flag = '0'
     </sql>
 
     <select id="selectMonitorServerList" parameterType="com.ruoyi.system.domain.monitor.MonitorServer" resultMap="MonitorServerResult">
         <include refid="selectMonitorServerVo"/>
-        WHERE del_flag = '0'
+        WHERE ms.del_flag = '0'
         <if test="serverIp != null and serverIp != ''">
-            AND server_ip LIKE CONCAT('%', #{serverIp}, '%')
+            AND ms.server_ip LIKE CONCAT('%', #{serverIp}, '%')
         </if>
         <if test="hostname != null and hostname != ''">
-            AND hostname LIKE CONCAT('%', #{hostname}, '%')
+            AND ms.hostname LIKE CONCAT('%', #{hostname}, '%')
+        </if>
+        <if test="assetId != null">
+            AND ms.asset_id = #{assetId}
         </if>
         <if test="monitorStatus != null and monitorStatus != ''">
-            AND monitor_status = #{monitorStatus}
+            AND ms.monitor_status = #{monitorStatus}
         </if>
         <if test="connectionStatus != null and connectionStatus != ''">
-            AND connection_status = #{connectionStatus}
+            AND ms.connection_status = #{connectionStatus}
         </if>
-        ORDER BY create_time DESC
+        ORDER BY ms.create_time DESC
     </select>
 
     <select id="selectMonitorServerById" parameterType="Long" resultMap="MonitorServerResult">
         <include refid="selectMonitorServerVo"/>
-        WHERE id = #{id}
+        WHERE ms.id = #{id}
     </select>
 
     <select id="selectMonitorServerByIp" parameterType="String" resultMap="MonitorServerResult">
         <include refid="selectMonitorServerVo"/>
-        WHERE server_ip = #{serverIp}
+        WHERE ms.server_ip = #{serverIp}
     </select>
 
     <select id="selectMonitorServerOnlineList" resultMap="MonitorServerResult">
         <include refid="selectMonitorServerVo"/>
-        WHERE del_flag = '0' AND connection_status = '0'
-        ORDER BY create_time DESC
+        WHERE ms.del_flag = '0' AND ms.connection_status = '0'
+        ORDER BY ms.create_time DESC
     </select>
 
     <select id="checkServerIpUnique" resultType="int">
@@ -80,6 +87,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <insert id="insertMonitorServer" parameterType="com.ruoyi.system.domain.monitor.MonitorServer" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO monitor_server(
+            <if test="assetId != null">asset_id,</if>
             <if test="serverIp != null and serverIp != ''">server_ip,</if>
             <if test="hostname != null and hostname != ''">hostname,</if>
             <if test="osName != null">os_name,</if>
@@ -90,12 +98,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="connectionStatus != null">connection_status,</if>
             <if test="sshPort != null">ssh_port,</if>
             <if test="sshUsername != null">ssh_username,</if>
-            <if test="sshPassword != null">ssh_password,</if>
             <if test="agentPath != null">agent_path,</if>
             <if test="remark != null">remark,</if>
             <if test="createBy != null and createBy != ''">create_by,</if>
             create_time
         ) VALUES (
+            <if test="assetId != null">#{assetId},</if>
             <if test="serverIp != null and serverIp != ''">#{serverIp},</if>
             <if test="hostname != null and hostname != ''">#{hostname},</if>
             <if test="osName != null">#{osName},</if>
@@ -106,7 +114,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="connectionStatus != null">#{connectionStatus},</if>
             <if test="sshPort != null">#{sshPort},</if>
             <if test="sshUsername != null">#{sshUsername},</if>
-            <if test="sshPassword != null">#{sshPassword},</if>
             <if test="agentPath != null">#{agentPath},</if>
             <if test="remark != null">#{remark},</if>
             <if test="createBy != null and createBy != ''">#{createBy},</if>
@@ -117,6 +124,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <update id="updateMonitorServer" parameterType="com.ruoyi.system.domain.monitor.MonitorServer">
         UPDATE monitor_server
         <set>
+            asset_id = #{assetId},
             <if test="serverIp != null and serverIp != ''">server_ip = #{serverIp},</if>
             <if test="hostname != null">hostname = #{hostname},</if>
             <if test="osName != null">os_name = #{osName},</if>
@@ -127,7 +135,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="connectionStatus != null">connection_status = #{connectionStatus},</if>
             <if test="sshPort != null">ssh_port = #{sshPort},</if>
             <if test="sshUsername != null">ssh_username = #{sshUsername},</if>
-            <if test="sshPassword != null">ssh_password = #{sshPassword},</if>
             <if test="agentPath != null">agent_path = #{agentPath},</if>
             <if test="remark != null">remark = #{remark},</if>
             <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
