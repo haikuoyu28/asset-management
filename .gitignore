@@ -54,7 +54,6 @@ nbdist/
 docker/mysql/data/
 docker/redis/data/
 docker/uploadPath/
-docker/registry/data/
 
 ######################################################################
 # Local delivery/check packages

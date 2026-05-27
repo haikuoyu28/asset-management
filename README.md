@@ -120,7 +120,7 @@ Docker Compose 编排包含 MySQL、Redis、后端服务和前端 Nginx。
 
 ### 1. 准备环境变量
 
-复制示例文件并修改密码、密钥和镜像仓库地址：
+复制示例文件并修改密码、密钥：
 
 ```bash
 cp .env.example .env
@@ -129,12 +129,7 @@ cp .env.example .env
 关键变量：
 
 ```env
-REGISTRY=localhost:5000
-VERSION=latest
-
 MYSQL_ROOT_PASSWORD=change-me
-MYSQL_USERNAME=root
-MYSQL_PASSWORD=change-me
 MYSQL_DATABASE=ry_cloud
 MYSQL_PORT=3306
 
@@ -151,28 +146,13 @@ FRONTEND_PORT=80
 
 真实 `.env` 已被 `.gitignore` 排除，不要提交到仓库。
 
-### 2. 构建并推送镜像
-
-Windows PowerShell：
-
-```powershell
-.\build-and-push.ps1 -Registry localhost:5000 -Version latest
-```
-
-脚本会构建并推送：
-
-```text
-asset-management-backend
-asset-management-frontend
-```
-
-前端镜像会在 Docker 构建阶段执行 `npm install` 和 `npm run build:prod`，不需要提交 `ruoyi-ui/dist`。
-
-### 3. 启动服务
+### 2. 构建并启动服务
 
 ```bash
-docker compose up -d
+docker compose up -d --build
 ```
+
+Compose 会在本机直接构建后端和前端镜像。前端镜像会在 Docker 构建阶段执行 `npm install` 和 `npm run build:prod`，不需要提交 `ruoyi-ui/dist`。
 
 查看状态和日志：
 
@@ -193,7 +173,7 @@ docker compose down
 | --- | --- | --- |
 | `admin` | `admin123` | 超级管理员 |
 
-首次公开部署后，请立即修改默认密码，并替换生产环境中的数据库密码、Druid 密码和 Token 密钥。
+首次公开部署后，请立即修改默认密码，并替换生产环境中的数据库 root 密码、Druid 密码和 Token 密钥。
 
 ## 数据监控
 

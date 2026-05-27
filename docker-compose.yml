@@ -37,7 +37,9 @@ services:
       - asset-network
 
   backend:
-    image: ${REGISTRY:-localhost:5000}/asset-management-backend:${VERSION:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
     container_name: asset-backend
     restart: always
     depends_on:
@@ -49,8 +51,8 @@ services:
       MYSQL_HOST: mysql
       MYSQL_PORT: 3306
       MYSQL_DATABASE: ${MYSQL_DATABASE:-ry_cloud}
-      MYSQL_USERNAME: ${MYSQL_USERNAME:-root}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?set MYSQL_PASSWORD in .env}
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in .env}
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
@@ -67,7 +69,9 @@ services:
       - asset-network
 
   frontend:
-    image: ${REGISTRY:-localhost:5000}/asset-management-frontend:${VERSION:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
     container_name: asset-frontend
     restart: always
     depends_on:
