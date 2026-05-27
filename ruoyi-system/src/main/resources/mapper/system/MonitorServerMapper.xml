@@ -21,6 +21,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="sshPort"          column="ssh_port"        />
         <result property="sshUsername"      column="ssh_username"    />
         <result property="agentPath"        column="agent_path"      />
+        <result property="agentToken"       column="agent_token"     />
+        <result property="agentEnabled"     column="agent_enabled"   />
         <result property="delFlag"          column="del_flag"        />
         <result property="remark"           column="remark"          />
         <result property="createBy"         column="create_by"       />
@@ -33,7 +35,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         SELECT ms.id, ms.asset_id, ai.asset_code, ai.asset_name,
                ms.server_ip, ms.hostname, ms.os_name, ms.cpu_cores, ms.memory_gb, ms.disk_gb,
                ms.monitor_status, ms.last_collect_time, ms.connection_status, ms.ssh_port,
-               ms.ssh_username, ms.agent_path, ms.del_flag, ms.remark,
+               ms.ssh_username, ms.agent_path, ms.agent_enabled, ms.del_flag, ms.remark,
                ms.create_by, ms.create_time, ms.update_by, ms.update_time
         FROM monitor_server ms
         LEFT JOIN asset_info ai ON ai.id = ms.asset_id AND ai.del_flag = '0'
@@ -70,6 +72,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         WHERE ms.server_ip = #{serverIp}
     </select>
 
+    <select id="selectMonitorServerAuthById" parameterType="Long" resultMap="MonitorServerResult">
+        SELECT ms.id, ms.asset_id, ai.asset_code, ai.asset_name,
+               ms.server_ip, ms.hostname, ms.os_name, ms.cpu_cores, ms.memory_gb, ms.disk_gb,
+               ms.monitor_status, ms.last_collect_time, ms.connection_status, ms.ssh_port,
+               ms.ssh_username, ms.agent_path, ms.agent_token, ms.agent_enabled, ms.del_flag, ms.remark,
+               ms.create_by, ms.create_time, ms.update_by, ms.update_time
+        FROM monitor_server ms
+        LEFT JOIN asset_info ai ON ai.id = ms.asset_id AND ai.del_flag = '0'
+        WHERE ms.id = #{id} AND ms.del_flag = '0'
+    </select>
+
     <select id="selectMonitorServerOnlineList" resultMap="MonitorServerResult">
         <include refid="selectMonitorServerVo"/>
         WHERE ms.del_flag = '0' AND ms.connection_status = '0'
@@ -99,6 +112,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="sshPort != null">ssh_port,</if>
             <if test="sshUsername != null">ssh_username,</if>
             <if test="agentPath != null">agent_path,</if>
+            <if test="agentEnabled != null">agent_enabled,</if>
             <if test="remark != null">remark,</if>
             <if test="createBy != null and createBy != ''">create_by,</if>
             create_time
@@ -115,6 +129,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="sshPort != null">#{sshPort},</if>
             <if test="sshUsername != null">#{sshUsername},</if>
             <if test="agentPath != null">#{agentPath},</if>
+            <if test="agentEnabled != null">#{agentEnabled},</if>
             <if test="remark != null">#{remark},</if>
             <if test="createBy != null and createBy != ''">#{createBy},</if>
             NOW()
@@ -136,6 +151,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="sshPort != null">ssh_port = #{sshPort},</if>
             <if test="sshUsername != null">ssh_username = #{sshUsername},</if>
             <if test="agentPath != null">agent_path = #{agentPath},</if>
+            <if test="agentEnabled != null">agent_enabled = #{agentEnabled},</if>
             <if test="remark != null">remark = #{remark},</if>
             <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
             update_time = NOW()
@@ -154,6 +170,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             connection_status = #{connectionStatus},
             update_time = NOW()
         WHERE id = #{serverId}
+    </update>
+
+    <update id="updateAgentToken">
+        UPDATE monitor_server
+        SET agent_token = #{agentToken},
+            agent_enabled = #{agentEnabled},
+            update_by = #{updateBy},
+            update_time = NOW()
+        WHERE id = #{id} AND del_flag = '0'
     </update>
 
     <delete id="deleteMonitorServerById" parameterType="Long">

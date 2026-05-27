@@ -96,6 +96,8 @@ CREATE TABLE `monitor_server` (
   `ssh_username` varchar(64) DEFAULT NULL COMMENT 'SSH用户名',
   `ssh_password` varchar(256) DEFAULT NULL COMMENT 'SSH密码（保留兼容，当前版本不保存）',
   `agent_path` varchar(256) DEFAULT NULL COMMENT 'Agent路径',
+  `agent_token` varchar(128) DEFAULT NULL COMMENT 'Agent上报Token',
+  `agent_enabled` char(1) NOT NULL DEFAULT '1' COMMENT 'Agent状态（0启用 1停用）',
   `remark` varchar(512) DEFAULT NULL COMMENT '备注',
   `del_flag` char(1) NOT NULL DEFAULT '0' COMMENT '删除标志（0存在 1删除）',
   `create_by` varchar(64) DEFAULT '' COMMENT '创建者',

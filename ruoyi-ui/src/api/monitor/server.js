@@ -35,6 +35,14 @@ export function updateServer(data) {
   })
 }
 
+// 重置 Agent Token
+export function resetAgentToken(id) {
+  return request({
+    url: '/monitor/server/' + id + '/agent-token',
+    method: 'put'
+  })
+}
+
 // 删除服务器
 export function delServer(id) {
   return request({

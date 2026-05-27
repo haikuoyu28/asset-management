@@ -72,13 +72,16 @@
           <span>{{ parseTime(scope.row.lastCollectTime) || '-' }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="280">
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="340">
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-data-line" @click="handleMonitor(scope.row)" v-hasPermi="['monitor:data:query']">
             监控
           </el-button>
           <el-button size="mini" type="text" icon="el-icon-upload2" @click="handleMockReport(scope.row)" v-hasPermi="['monitor:data:add']">
             上报
+          </el-button>
+          <el-button size="mini" type="text" icon="el-icon-connection" @click="handleAgent(scope.row)" v-hasPermi="['monitor:server:edit']">
+            Agent
           </el-button>
           <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)" v-hasPermi="['monitor:server:edit']">
             编辑
@@ -192,6 +195,35 @@
       </div>
     </el-dialog>
 
+    <el-dialog :title="'Agent 配置 - ' + (agentServer.serverIp || '')" :visible.sync="agentOpen" width="720px" append-to-body>
+      <el-alert type="warning" :closable="false" show-icon class="mb16">
+        <template slot="title">
+          Token 只在重置后展示一次，请放入目标服务器的 Agent 配置文件，不要提交到 Git。
+        </template>
+      </el-alert>
+      <el-descriptions :column="2" border class="mb16">
+        <el-descriptions-item label="服务器ID">{{ agentServer.id }}</el-descriptions-item>
+        <el-descriptions-item label="服务器IP">{{ agentServer.serverIp }}</el-descriptions-item>
+        <el-descriptions-item label="主机名">{{ agentServer.hostname }}</el-descriptions-item>
+        <el-descriptions-item label="Agent状态">
+          <el-tag size="mini" :type="agentServer.agentEnabled === '0' ? 'success' : 'info'">
+            {{ agentServer.agentEnabled === '0' ? '已启用' : '未启用' }}
+          </el-tag>
+        </el-descriptions-item>
+      </el-descriptions>
+      <el-input
+        v-model="agentConfigText"
+        type="textarea"
+        :rows="12"
+        readonly
+        placeholder="点击重置 Token 后生成 Agent 配置"
+      />
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" icon="el-icon-refresh" @click="handleResetAgentToken">重置 Token 并生成配置</el-button>
+        <el-button @click="agentOpen = false">关闭</el-button>
+      </div>
+    </el-dialog>
+
     <el-dialog :title="'实时监控 - ' + (monitorServer.serverIp || '')" :visible.sync="monitorOpen" width="1080px" append-to-body @close="stopMonitorTimer">
       <el-row :gutter="16">
         <el-col :span="6">
@@ -243,7 +275,7 @@
 
 <script>
 import * as echarts from 'echarts'
-import { listServer, getServer, addServer, updateServer, delServer } from "@/api/monitor/server"
+import { listServer, getServer, addServer, updateServer, delServer, resetAgentToken } from "@/api/monitor/server"
 import { getRecentData, getLatestData, reportMonitorData } from "@/api/monitor/data"
 import { listAssetInfo } from "@/api/asset/info"
 
@@ -261,6 +293,9 @@ export default {
       open: false,
       monitorOpen: false,
       monitorServer: {},
+      agentOpen: false,
+      agentServer: {},
+      agentConfigText: "",
       latestData: {},
       recentDataList: [],
       queryParams: {
@@ -378,6 +413,28 @@ export default {
       this.monitorOpen = true
       this.loadMonitorData()
       this.startMonitorTimer()
+    },
+    handleAgent(row) {
+      this.agentServer = { ...row, agentToken: null }
+      this.agentConfigText = this.buildAgentConfig(this.agentServer)
+      this.agentOpen = true
+    },
+    handleResetAgentToken() {
+      resetAgentToken(this.agentServer.id).then(response => {
+        this.agentServer = response.data || this.agentServer
+        this.agentConfigText = this.buildAgentConfig(this.agentServer)
+        this.$modal.msgSuccess('Agent Token 已重置')
+        this.getList()
+      })
+    },
+    buildAgentConfig(server) {
+      return JSON.stringify({
+        serverId: server.id || null,
+        endpoint: 'http://localhost:8080/monitor/data/agent/report',
+        token: server.agentToken || '<点击重置后生成>',
+        intervalSeconds: 30,
+        diskPath: '/'
+      }, null, 2)
     },
     handleMockReport(row) {
       const cpuUsage = this.randomMetric(25, 92)

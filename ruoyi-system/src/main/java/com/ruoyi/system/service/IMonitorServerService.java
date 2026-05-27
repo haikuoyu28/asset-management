@@ -22,6 +22,8 @@ public interface IMonitorServerService {
 
     public int updateCollectTime(Long serverId);
 
+    public MonitorServer resetAgentToken(Long id);
+
     public int deleteMonitorServerById(Long id);
 
     public int deleteMonitorServerByIds(Long[] ids);

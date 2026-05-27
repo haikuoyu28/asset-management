@@ -71,6 +71,13 @@ public class MonitorServerController extends BaseController {
         return toAjax(monitorServerService.updateMonitorServer(monitorServer));
     }
 
+    @PreAuthorize("@ss.hasPermi('monitor:server:edit')")
+    @Log(title = "Agent Token", businessType = BusinessType.UPDATE)
+    @PutMapping("/{id}/agent-token")
+    public AjaxResult resetAgentToken(@PathVariable("id") Long id) {
+        return success(monitorServerService.resetAgentToken(id));
+    }
+
     @PreAuthorize("@ss.hasPermi('monitor:server:remove')")
     @Log(title = "服务器监控", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")

@@ -32,5 +32,9 @@ public interface MonitorServerMapper {
 
     public MonitorServer selectMonitorServerByIp(@Param("serverIp") String serverIp);
 
+    public MonitorServer selectMonitorServerAuthById(Long id);
+
     public int checkServerIpUnique(@Param("serverIp") String serverIp, @Param("id") Long id);
+
+    public int updateAgentToken(MonitorServer monitorServer);
 }

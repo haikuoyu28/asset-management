@@ -67,17 +67,14 @@ public class MonitorDataServiceImpl implements IMonitorDataService {
     @Transactional
     public MonitorData reportMonitorData(MonitorData monitorData) {
         MonitorServer server = resolveServer(monitorData);
-        monitorData.setServerId(server.getId());
-        monitorData.setServerIp(server.getServerIp());
-        if (monitorData.getCollectTime() == null) {
-            monitorData.setCollectTime(new Date());
-        }
+        return saveMonitorData(server, monitorData);
+    }
 
-        monitorDataMapper.insertMonitorData(monitorData);
-
-        boolean abnormal = evaluateRules(server, monitorData);
-        monitorServerMapper.updateCollectStatus(server.getId(), abnormal ? "1" : "0", "0", monitorData.getCollectTime());
-        return monitorData;
+    @Override
+    @Transactional
+    public MonitorData reportAgentMonitorData(MonitorData monitorData, String agentToken) {
+        MonitorServer server = resolveAgentServer(monitorData, agentToken);
+        return saveMonitorData(server, monitorData);
     }
 
     @Override
@@ -107,6 +104,40 @@ public class MonitorDataServiceImpl implements IMonitorDataService {
             throw new ServiceException("未找到对应的监控服务器，请先在服务器管理中纳管该服务器");
         }
         return server;
+    }
+
+    private MonitorServer resolveAgentServer(MonitorData monitorData, String agentToken) {
+        if (monitorData.getServerId() == null) {
+            throw new ServiceException("Agent上报必须携带serverId");
+        }
+        if (StringUtils.isEmpty(agentToken)) {
+            throw new ServiceException("Agent Token不能为空");
+        }
+        MonitorServer server = monitorServerMapper.selectMonitorServerAuthById(monitorData.getServerId());
+        if (server == null) {
+            throw new ServiceException("未找到对应的监控服务器");
+        }
+        if (!"0".equals(server.getAgentEnabled()) || StringUtils.isEmpty(server.getAgentToken())) {
+            throw new ServiceException("该服务器未启用Agent上报");
+        }
+        if (!agentToken.equals(server.getAgentToken())) {
+            throw new ServiceException("Agent Token校验失败");
+        }
+        return server;
+    }
+
+    private MonitorData saveMonitorData(MonitorServer server, MonitorData monitorData) {
+        monitorData.setServerId(server.getId());
+        monitorData.setServerIp(server.getServerIp());
+        if (monitorData.getCollectTime() == null) {
+            monitorData.setCollectTime(new Date());
+        }
+
+        monitorDataMapper.insertMonitorData(monitorData);
+
+        boolean abnormal = evaluateRules(server, monitorData);
+        monitorServerMapper.updateCollectStatus(server.getId(), abnormal ? "1" : "0", "0", monitorData.getCollectTime());
+        return monitorData;
     }
 
     private boolean evaluateRules(MonitorServer server, MonitorData data) {

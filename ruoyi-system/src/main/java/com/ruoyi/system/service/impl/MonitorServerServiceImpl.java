@@ -1,6 +1,7 @@
 package com.ruoyi.system.service.impl;
 
 import java.util.List;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +45,9 @@ public class MonitorServerServiceImpl implements IMonitorServerService {
             throw new ServiceException("服务器IP已存在");
         }
         monitorServer.setSshPassword(null);
+        if (StringUtils.isEmpty(monitorServer.getAgentEnabled())) {
+            monitorServer.setAgentEnabled("1");
+        }
         monitorServer.setCreateBy(SecurityUtils.getUsername());
         return monitorServerMapper.insertMonitorServer(monitorServer);
     }
@@ -55,6 +59,7 @@ public class MonitorServerServiceImpl implements IMonitorServerService {
             throw new ServiceException("服务器IP已存在");
         }
         monitorServer.setSshPassword(null);
+        monitorServer.setAgentToken(null);
         monitorServer.setUpdateBy(SecurityUtils.getUsername());
         return monitorServerMapper.updateMonitorServer(monitorServer);
     }
@@ -62,6 +67,25 @@ public class MonitorServerServiceImpl implements IMonitorServerService {
     @Override
     public int updateCollectTime(Long serverId) {
         return monitorServerMapper.updateCollectTime(serverId);
+    }
+
+    @Override
+    @Transactional
+    public MonitorServer resetAgentToken(Long id) {
+        MonitorServer server = monitorServerMapper.selectMonitorServerById(id);
+        if (server == null) {
+            throw new ServiceException("服务器不存在");
+        }
+        String token = UUID.randomUUID().toString().replace("-", "") + UUID.randomUUID().toString().replace("-", "");
+        MonitorServer update = new MonitorServer();
+        update.setId(id);
+        update.setAgentToken(token);
+        update.setAgentEnabled("0");
+        update.setUpdateBy(SecurityUtils.getUsername());
+        monitorServerMapper.updateAgentToken(update);
+        server.setAgentToken(token);
+        server.setAgentEnabled("0");
+        return server;
     }
 
     @Override

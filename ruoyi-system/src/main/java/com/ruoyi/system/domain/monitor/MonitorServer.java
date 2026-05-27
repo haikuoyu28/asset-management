@@ -31,6 +31,8 @@ public class MonitorServer extends BaseEntity {
     private String sshUsername;
     private String sshPassword;
     private String agentPath;
+    private String agentToken;
+    private String agentEnabled;
     private String delFlag;
     private String remark;
 
@@ -168,6 +170,22 @@ public class MonitorServer extends BaseEntity {
 
     public void setAgentPath(String agentPath) {
         this.agentPath = agentPath;
+    }
+
+    public String getAgentToken() {
+        return agentToken;
+    }
+
+    public void setAgentToken(String agentToken) {
+        this.agentToken = agentToken;
+    }
+
+    public String getAgentEnabled() {
+        return agentEnabled;
+    }
+
+    public void setAgentEnabled(String agentEnabled) {
+        this.agentEnabled = agentEnabled;
     }
 
     public String getDelFlag() {
