@@ -4,7 +4,7 @@
       <div class="hero-copy">
         <div class="eyebrow">Operations Workbench</div>
         <h1>企业 IT 运维总览</h1>
-        <p>资产、服务器、监控指标与告警事件统一汇聚，形成稳定可演进的运维底座。</p>
+        <p>统一呈现资产、服务器、监控指标与告警事件，让运维入口从数据总览开始。</p>
       </div>
       <div class="hero-status">
         <div class="status-item">
@@ -64,11 +64,11 @@
         <div class="panel-header">
           <div>
             <h2>实时告警</h2>
-            <span>待处理事件优先展示</span>
+            <span>未处理事件优先展示</span>
           </div>
           <button class="ghost-button danger" @click="go('/ops-monitor/alarm')">处理告警</button>
         </div>
-        <div class="event-list">
+        <div v-if="alarmEvents.length" class="event-list">
           <div v-for="alarm in alarmEvents" :key="alarm.id" class="event-row">
             <div :class="['event-level', alarm.level]">{{ alarm.levelText }}</div>
             <div class="event-main">
@@ -77,6 +77,7 @@
             </div>
           </div>
         </div>
+        <el-empty v-else description="暂无待处理告警" :image-size="80" />
       </article>
 
       <article class="panel quick-panel">
@@ -102,7 +103,7 @@
           </div>
           <button class="ghost-button" @click="go('/asset/flow')">变更记录</button>
         </div>
-        <div class="timeline-list">
+        <div v-if="assetFlows.length" class="timeline-list">
           <div v-for="flow in assetFlows" :key="flow.id" class="timeline-row">
             <span class="timeline-dot"></span>
             <div>
@@ -111,6 +112,7 @@
             </div>
           </div>
         </div>
+        <el-empty v-else description="暂无资产变更" :image-size="80" />
       </article>
     </section>
   </div>
@@ -118,11 +120,7 @@
 
 <script>
 import * as echarts from 'echarts'
-import { listAssetInfo } from '@/api/asset/info'
-import { listAssetFlow } from '@/api/asset/flow'
-import { listServer } from '@/api/monitor/server'
-import { getUnhandleCount, getUnhandleList } from '@/api/monitor/alarm'
-import { listMonitorData } from '@/api/monitor/data'
+import { getWorkbenchSummary } from '@/api/monitor/workbench'
 
 export default {
   name: 'Index',
@@ -132,27 +130,22 @@ export default {
       currentTime: '',
       resourceChart: null,
       healthChart: null,
-      assetTotal: 128,
-      serverTotal: 24,
-      onlineServers: 21,
-      alarmTotal: 3,
-      flowTotal: 15,
+      summary: {
+        assetTotal: 0,
+        serverTotal: 0,
+        onlineServers: 0,
+        onlineRate: 0,
+        alarmTotal: 0,
+        flowTotal: 0
+      },
       resourceSeries: this.defaultResourceSeries(),
       healthItems: [
-        { label: '在线', value: 21, type: 'good' },
-        { label: '离线', value: 2, type: 'warn' },
-        { label: '异常', value: 1, type: 'bad' }
+        { label: '在线', value: 0, type: 'good' },
+        { label: '离线', value: 0, type: 'warn' },
+        { label: '异常', value: 0, type: 'bad' }
       ],
-      alarmEvents: [
-        { id: 'fallback-1', level: 'critical', levelText: '严重', title: '核心服务器 CPU 持续高位', time: '10 分钟前' },
-        { id: 'fallback-2', level: 'warning', levelText: '警告', title: '磁盘空间超过阈值', time: '28 分钟前' },
-        { id: 'fallback-3', level: 'info', levelText: '提示', title: '监控采集任务已恢复', time: '1 小时前' }
-      ],
-      assetFlows: [
-        { id: 'flow-1', title: '新增服务器资产 SRV-024', time: '今天 09:30' },
-        { id: 'flow-2', title: '资产责任人完成变更', time: '昨天 16:12' },
-        { id: 'flow-3', title: '网络设备进入维护状态', time: '昨天 11:08' }
-      ],
+      alarmEvents: [],
+      assetFlows: [],
       quickActions: [
         { label: '设备资产', path: '/asset/info', icon: 'list' },
         { label: '服务器管理', path: '/ops-monitor/server', icon: 'server' },
@@ -164,28 +157,22 @@ export default {
   computed: {
     metrics() {
       return [
-        { key: 'assets', label: '资产总数', value: this.assetTotal, icon: 'list', trend: '统一纳管', trendType: 'stable' },
-        { key: 'servers', label: '服务器数', value: this.serverTotal, icon: 'server', trend: `${this.onlineRate}% 在线`, trendType: 'good' },
-        { key: 'alarms', label: '待处理告警', value: this.alarmTotal, icon: 'bug', trend: this.alarmTotal > 0 ? '需关注' : '正常', trendType: this.alarmTotal > 0 ? 'danger' : 'good' },
-        { key: 'flows', label: '资产变更', value: this.flowTotal, icon: 'time', trend: '生命周期', trendType: 'stable' }
+        { key: 'assets', label: '资产总数', value: this.summary.assetTotal, icon: 'list', trend: '统一纳管', trendType: 'stable' },
+        { key: 'servers', label: '服务器数', value: this.summary.serverTotal, icon: 'server', trend: `${this.summary.onlineRate}% 在线`, trendType: 'good' },
+        { key: 'alarms', label: '待处理告警', value: this.summary.alarmTotal, icon: 'bug', trend: this.summary.alarmTotal > 0 ? '需要关注' : '正常', trendType: this.summary.alarmTotal > 0 ? 'danger' : 'good' },
+        { key: 'flows', label: '资产变更', value: this.summary.flowTotal, icon: 'time', trend: '生命周期', trendType: 'stable' }
       ]
-    },
-    onlineRate() {
-      if (!this.serverTotal) {
-        return 0
-      }
-      return Math.round((this.onlineServers / this.serverTotal) * 100)
     }
   },
   mounted() {
     this.tickTime()
     this.nowTimer = window.setInterval(this.tickTime, 30000)
-    this.loadWorkbench()
     this.$nextTick(() => {
       this.initResourceChart()
       this.initHealthChart()
       window.addEventListener('resize', this.resizeCharts)
     })
+    this.loadWorkbench()
   },
   beforeDestroy() {
     window.clearInterval(this.nowTimer)
@@ -203,101 +190,66 @@ export default {
       const pad = value => String(value).padStart(2, '0')
       this.currentTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`
     },
-    async loadWorkbench() {
-      await Promise.all([
-        this.loadAssetSummary(),
-        this.loadServerSummary(),
-        this.loadAlarmSummary(),
-        this.loadFlowSummary(),
-        this.loadMonitorSummary()
-      ])
-      this.refreshCharts()
-    },
-    async loadAssetSummary() {
-      try {
-        const res = await listAssetInfo({ pageNum: 1, pageSize: 1 })
-        this.assetTotal = this.pickTotal(res, this.assetTotal)
-      } catch (e) {}
-    },
-    async loadServerSummary() {
-      try {
-        const res = await listServer({ pageNum: 1, pageSize: 100 })
-        const rows = res.rows || []
-        this.serverTotal = this.pickTotal(res, rows.length || this.serverTotal)
-        const online = rows.filter(item => item.connectionStatus === '0' || item.monitorStatus === '0').length
-        this.onlineServers = rows.length ? online : Math.min(this.onlineServers, this.serverTotal)
-        const offline = Math.max(this.serverTotal - this.onlineServers, 0)
-        this.healthItems = [
-          { label: '在线', value: this.onlineServers, type: 'good' },
-          { label: '离线', value: offline, type: 'warn' },
-          { label: '异常', value: this.alarmTotal, type: 'bad' }
-        ]
-      } catch (e) {}
-    },
-    async loadAlarmSummary() {
-      try {
-        const countRes = await getUnhandleCount()
-        this.alarmTotal = Number(countRes.data || countRes.msg || this.alarmTotal) || 0
-      } catch (e) {}
-      try {
-        const listRes = await getUnhandleList()
-        const rows = listRes.rows || listRes.data || []
-        if (rows.length) {
-          this.alarmEvents = rows.slice(0, 4).map((item, index) => ({
-            id: item.id || index,
-            level: this.mapAlarmLevel(item.alarmLevel),
-            levelText: this.mapAlarmLevelText(item.alarmLevel),
-            title: item.alarmMessage || `${item.hostname || item.serverIp || '服务器'} 指标异常`,
-            time: item.alarmTime || '刚刚'
-          }))
+    loadWorkbench() {
+      getWorkbenchSummary().then(response => {
+        const data = response.data || {}
+        const metrics = data.metrics || {}
+        this.summary = {
+          assetTotal: this.toNumber(metrics.assetTotal),
+          serverTotal: this.toNumber(metrics.serverTotal),
+          onlineServers: this.toNumber(metrics.onlineServers),
+          onlineRate: this.toNumber(metrics.onlineRate),
+          alarmTotal: this.toNumber(metrics.alarmTotal),
+          flowTotal: this.toNumber(metrics.flowTotal)
         }
-      } catch (e) {}
+        this.healthItems = (data.healthItems || this.healthItems).map(item => ({
+          label: item.label,
+          value: this.toNumber(item.value),
+          type: item.type || 'good'
+        }))
+        this.resourceSeries = this.normalizeResourceSeries(data.resourceSeries)
+        this.alarmEvents = (data.alarmEvents || []).map(this.normalizeAlarm)
+        this.assetFlows = (data.assetFlows || []).map(this.normalizeFlow)
+        this.refreshCharts()
+      }).catch(() => {
+        this.refreshCharts()
+      })
     },
-    async loadFlowSummary() {
-      try {
-        const res = await listAssetFlow({ pageNum: 1, pageSize: 4 })
-        const rows = res.rows || []
-        this.flowTotal = this.pickTotal(res, this.flowTotal)
-        if (rows.length) {
-          this.assetFlows = rows.map((item, index) => ({
-            id: item.id || index,
-            title: `${this.mapFlowType(item.flowType)} ${item.assetName || item.assetCode || '资产'}`,
-            time: item.operateTime || item.createTime || ''
-          }))
-        }
-      } catch (e) {}
+    normalizeResourceSeries(series) {
+      if (!series || !series.time || !series.time.length) {
+        return this.defaultResourceSeries()
+      }
+      return {
+        time: series.time,
+        cpu: (series.cpu || []).map(this.toNumber),
+        memory: (series.memory || []).map(this.toNumber),
+        disk: (series.disk || []).map(this.toNumber)
+      }
     },
-    async loadMonitorSummary() {
-      try {
-        const res = await listMonitorData({ pageNum: 1, pageSize: 6 })
-        const rows = (res.rows || []).slice().reverse()
-        if (rows.length) {
-          this.resourceSeries = {
-            time: rows.map(item => this.formatTimeLabel(item.collectTime)),
-            cpu: rows.map(item => this.toNumber(item.cpuUsage)),
-            memory: rows.map(item => this.toNumber(item.memoryUsage)),
-            disk: rows.map(item => this.toNumber(item.diskUsage))
-          }
-        }
-      } catch (e) {}
+    normalizeAlarm(item, index) {
+      const level = this.mapAlarmLevel(item.alarmLevel)
+      return {
+        id: item.id || index,
+        level,
+        levelText: this.mapAlarmLevelText(level),
+        title: item.alarmMessage || `${item.hostname || item.serverIp || '服务器'} 指标异常`,
+        time: item.alarmTime || '刚刚'
+      }
     },
-    pickTotal(res, fallback) {
-      return typeof res.total === 'number' ? res.total : fallback
+    normalizeFlow(item, index) {
+      return {
+        id: item.id || index,
+        title: `${this.mapFlowType(item.flowType)} ${item.assetName || item.assetCode || '资产'}`,
+        time: item.operateTime || ''
+      }
     },
     toNumber(value) {
       const parsed = Number(value)
       return Number.isFinite(parsed) ? parsed : 0
     },
-    formatTimeLabel(value) {
-      if (!value) {
-        return '--:--'
-      }
-      const text = String(value)
-      return text.length >= 16 ? text.slice(11, 16) : text
-    },
     mapAlarmLevel(level) {
       const value = String(level || '').toLowerCase()
-      if (value === '1' || value.includes('critical') || value.includes('严重')) {
+      if (value === '3' || value.includes('critical') || value.includes('严重')) {
         return 'critical'
       }
       if (value === '2' || value.includes('warn') || value.includes('警告')) {
@@ -306,25 +258,25 @@ export default {
       return 'info'
     },
     mapAlarmLevelText(level) {
-      const mapped = this.mapAlarmLevel(level)
-      return mapped === 'critical' ? '严重' : mapped === 'warning' ? '警告' : '提示'
+      return level === 'critical' ? '严重' : level === 'warning' ? '警告' : '提示'
     },
     mapFlowType(type) {
       const map = {
-        '1': '新增',
-        '2': '领用',
-        '3': '归还',
+        '1': '领用',
+        '2': '归还',
+        '3': '报修',
         '4': '维修',
-        '5': '报废'
+        '5': '巡检',
+        '6': '报废'
       }
       return map[String(type)] || '变更'
     },
     defaultResourceSeries() {
       return {
         time: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
-        cpu: [42, 48, 64, 72, 59, 53],
-        memory: [58, 62, 66, 73, 69, 64],
-        disk: [35, 38, 41, 45, 47, 50]
+        cpu: [0, 0, 0, 0, 0, 0],
+        memory: [0, 0, 0, 0, 0, 0],
+        disk: [0, 0, 0, 0, 0, 0]
       }
     },
     initResourceChart() {
@@ -423,8 +375,7 @@ export default {
   min-height: calc(100vh - 84px);
   padding: 18px;
   color: #d8e4ef;
-  background:
-    linear-gradient(180deg, #101827 0%, #111827 38%, #f4f7fb 38%, #f4f7fb 100%);
+  background: linear-gradient(180deg, #101827 0%, #111827 38%, #f4f7fb 38%, #f4f7fb 100%);
 }
 
 .hero-panel {
