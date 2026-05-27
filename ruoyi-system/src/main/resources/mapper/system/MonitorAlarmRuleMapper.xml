@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.MonitorAlarmRuleMapper">
+
+    <resultMap type="com.ruoyi.system.domain.monitor.MonitorAlarmRule" id="MonitorAlarmRuleResult">
+        <id     property="id"              column="id"               />
+        <result property="ruleName"        column="rule_name"        />
+        <result property="alarmType"       column="alarm_type"       />
+        <result property="alarmLevel"      column="alarm_level"      />
+        <result property="compareOperator" column="compare_operator" />
+        <result property="thresholdValue"  column="threshold_value"  />
+        <result property="scopeType"       column="scope_type"       />
+        <result property="serverId"        column="server_id"        />
+        <result property="serverIp"        column="server_ip"        />
+        <result property="hostname"        column="hostname"         />
+        <result property="silentMinutes"   column="silent_minutes"   />
+        <result property="enabled"         column="enabled"          />
+        <result property="delFlag"         column="del_flag"         />
+        <result property="remark"          column="remark"           />
+        <result property="createBy"        column="create_by"        />
+        <result property="createTime"      column="create_time"      />
+        <result property="updateBy"        column="update_by"        />
+        <result property="updateTime"      column="update_time"      />
+    </resultMap>
+
+    <sql id="selectMonitorAlarmRuleVo">
+        SELECT mar.id, mar.rule_name, mar.alarm_type, mar.alarm_level, mar.compare_operator,
+               mar.threshold_value, mar.scope_type, mar.server_id, ms.server_ip, ms.hostname,
+               mar.silent_minutes, mar.enabled, mar.del_flag, mar.remark,
+               mar.create_by, mar.create_time, mar.update_by, mar.update_time
+        FROM monitor_alarm_rule mar
+        LEFT JOIN monitor_server ms ON ms.id = mar.server_id AND ms.del_flag = '0'
+    </sql>
+
+    <select id="selectMonitorAlarmRuleList" parameterType="com.ruoyi.system.domain.monitor.MonitorAlarmRule" resultMap="MonitorAlarmRuleResult">
+        <include refid="selectMonitorAlarmRuleVo"/>
+        WHERE mar.del_flag = '0'
+        <if test="ruleName != null and ruleName != ''">
+            AND mar.rule_name LIKE CONCAT('%', #{ruleName}, '%')
+        </if>
+        <if test="alarmType != null and alarmType != ''">
+            AND mar.alarm_type = #{alarmType}
+        </if>
+        <if test="alarmLevel != null and alarmLevel != ''">
+            AND mar.alarm_level = #{alarmLevel}
+        </if>
+        <if test="scopeType != null and scopeType != ''">
+            AND mar.scope_type = #{scopeType}
+        </if>
+        <if test="enabled != null and enabled != ''">
+            AND mar.enabled = #{enabled}
+        </if>
+        ORDER BY mar.create_time DESC, mar.id DESC
+    </select>
+
+    <select id="selectMonitorAlarmRuleById" parameterType="Long" resultMap="MonitorAlarmRuleResult">
+        <include refid="selectMonitorAlarmRuleVo"/>
+        WHERE mar.id = #{id}
+    </select>
+
+    <select id="selectEnabledRules" resultMap="MonitorAlarmRuleResult">
+        <include refid="selectMonitorAlarmRuleVo"/>
+        WHERE mar.del_flag = '0'
+          AND mar.enabled = '0'
+          AND (mar.scope_type = '0' OR (mar.scope_type = '1' AND mar.server_id = #{serverId}))
+        ORDER BY mar.alarm_level DESC, mar.id ASC
+    </select>
+
+    <insert id="insertMonitorAlarmRule" parameterType="com.ruoyi.system.domain.monitor.MonitorAlarmRule" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO monitor_alarm_rule(
+            rule_name, alarm_type, alarm_level, compare_operator, threshold_value,
+            scope_type, server_id, silent_minutes, enabled, remark, create_by, create_time
+        ) VALUES (
+            #{ruleName}, #{alarmType}, #{alarmLevel}, #{compareOperator}, #{thresholdValue},
+            #{scopeType}, #{serverId}, #{silentMinutes}, #{enabled}, #{remark}, #{createBy}, NOW()
+        )
+    </insert>
+
+    <update id="updateMonitorAlarmRule" parameterType="com.ruoyi.system.domain.monitor.MonitorAlarmRule">
+        UPDATE monitor_alarm_rule
+        <set>
+            <if test="ruleName != null">rule_name = #{ruleName},</if>
+            <if test="alarmType != null">alarm_type = #{alarmType},</if>
+            <if test="alarmLevel != null">alarm_level = #{alarmLevel},</if>
+            <if test="compareOperator != null">compare_operator = #{compareOperator},</if>
+            <if test="thresholdValue != null">threshold_value = #{thresholdValue},</if>
+            <if test="scopeType != null">scope_type = #{scopeType},</if>
+            server_id = #{serverId},
+            <if test="silentMinutes != null">silent_minutes = #{silentMinutes},</if>
+            <if test="enabled != null">enabled = #{enabled},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteMonitorAlarmRuleById" parameterType="Long">
+        UPDATE monitor_alarm_rule SET del_flag = '1' WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteMonitorAlarmRuleByIds" parameterType="Long">
+        UPDATE monitor_alarm_rule SET del_flag = '1' WHERE id IN
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

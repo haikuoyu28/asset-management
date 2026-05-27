@@ -68,6 +68,7 @@ INSERT INTO `sys_menu` (
     `parent_id`,
     `order_num`,
     `path`,
+    `route_name`,
     `component`,
     `menu_type`,
     `visible`,
@@ -299,11 +300,11 @@ INSERT INTO `sys_menu` (
     `create_time`,
     `remark`
 ) VALUES
-('服务器查询', @server_id, '1', '', '', 'F', '0', '0', 'monitor:server:query', '#', 'admin', NOW(), ''),
-('服务器新增', @server_id, '2', '', '', 'F', '0', '0', 'monitor:server:add', '#', 'admin', NOW(), ''),
-('服务器修改', @server_id, '3', '', '', 'F', '0', '0', 'monitor:server:edit', '#', 'admin', NOW(), ''),
-('服务器删除', @server_id, '4', '', '', 'F', '0', '0', 'monitor:server:remove', '#', 'admin', NOW(), ''),
-('服务器导出', @server_id, '5', '', '', 'F', '0', '0', 'monitor:server:export', '#', 'admin', NOW(), '');
+('服务器查询', @server_id, '1', '', '', '', 'F', '0', '0', 'monitor:server:query', '#', 'admin', NOW(), ''),
+('服务器新增', @server_id, '2', '', '', '', 'F', '0', '0', 'monitor:server:add', '#', 'admin', NOW(), ''),
+('服务器修改', @server_id, '3', '', '', '', 'F', '0', '0', 'monitor:server:edit', '#', 'admin', NOW(), ''),
+('服务器删除', @server_id, '4', '', '', '', 'F', '0', '0', 'monitor:server:remove', '#', 'admin', NOW(), ''),
+('服务器导出', @server_id, '5', '', '', '', 'F', '0', '0', 'monitor:server:export', '#', 'admin', NOW(), '');
 
 -- 监控数据菜单
 INSERT INTO `sys_menu` (
@@ -311,6 +312,7 @@ INSERT INTO `sys_menu` (
     `parent_id`,
     `order_num`,
     `path`,
+    `route_name`,
     `component`,
     `menu_type`,
     `visible`,
@@ -357,8 +359,9 @@ INSERT INTO `sys_menu` (
     `create_time`,
     `remark`
 ) VALUES
-('监控数据查询', @data_id, '1', '', '', 'F', '0', '0', 'monitor:data:query', '#', 'admin', NOW(), ''),
-('监控数据删除', @data_id, '2', '', '', 'F', '0', '0', 'monitor:data:remove', '#', 'admin', NOW(), '');
+('监控数据查询', @data_id, '1', '', '', '', 'F', '0', '0', 'monitor:data:query', '#', 'admin', NOW(), ''),
+('监控数据上报', @data_id, '2', '', '', '', 'F', '0', '0', 'monitor:data:add', '#', 'admin', NOW(), ''),
+('监控数据删除', @data_id, '3', '', '', '', 'F', '0', '0', 'monitor:data:remove', '#', 'admin', NOW(), '');
 
 -- 告警管理菜单
 INSERT INTO `sys_menu` (
@@ -366,6 +369,7 @@ INSERT INTO `sys_menu` (
     `parent_id`,
     `order_num`,
     `path`,
+    `route_name`,
     `component`,
     `menu_type`,
     `visible`,
@@ -411,10 +415,66 @@ INSERT INTO `sys_menu` (
     `create_time`,
     `remark`
 ) VALUES
-('告警查询', @alarm_id, '1', '', '', 'F', '0', '0', 'monitor:alarm:query', '#', 'admin', NOW(), ''),
-('告警新增', @alarm_id, '2', '', '', 'F', '0', '0', 'monitor:alarm:add', '#', 'admin', NOW(), ''),
-('告警修改', @alarm_id, '3', '', '', 'F', '0', '0', 'monitor:alarm:edit', '#', 'admin', NOW(), ''),
-('告警删除', @alarm_id, '4', '', '', 'F', '0', '0', 'monitor:alarm:remove', '#', 'admin', NOW(), '');
+('告警查询', @alarm_id, '1', '', '', '', 'F', '0', '0', 'monitor:alarm:query', '#', 'admin', NOW(), ''),
+('告警新增', @alarm_id, '2', '', '', '', 'F', '0', '0', 'monitor:alarm:add', '#', 'admin', NOW(), ''),
+('告警修改', @alarm_id, '3', '', '', '', 'F', '0', '0', 'monitor:alarm:edit', '#', 'admin', NOW(), ''),
+('告警删除', @alarm_id, '4', '', '', '', 'F', '0', '0', 'monitor:alarm:remove', '#', 'admin', NOW(), '');
+
+-- 告警规则菜单
+INSERT INTO `sys_menu` (
+    `menu_name`,
+    `parent_id`,
+    `order_num`,
+    `path`,
+    `route_name`,
+    `component`,
+    `menu_type`,
+    `visible`,
+    `status`,
+    `perms`,
+    `icon`,
+    `create_by`,
+    `create_time`,
+    `remark`
+) VALUES (
+    '告警规则',
+    @monitor_parent_id,
+    '4',
+    'rule',
+    'OpsAlarmRule',
+    'monitor/rule/index',
+    'C',
+    '0',
+    '0',
+    'monitor:rule:list',
+    'education',
+    'admin',
+    NOW(),
+    '告警规则菜单'
+);
+
+SET @rule_id = (SELECT menu_id FROM sys_menu WHERE menu_name = '告警规则' LIMIT 1);
+
+INSERT INTO `sys_menu` (
+    `menu_name`,
+    `parent_id`,
+    `order_num`,
+    `path`,
+    `route_name`,
+    `component`,
+    `menu_type`,
+    `visible`,
+    `status`,
+    `perms`,
+    `icon`,
+    `create_by`,
+    `create_time`,
+    `remark`
+) VALUES
+('告警规则查询', @rule_id, '1', '', '', '', 'F', '0', '0', 'monitor:rule:query', '#', 'admin', NOW(), ''),
+('告警规则新增', @rule_id, '2', '', '', '', 'F', '0', '0', 'monitor:rule:add', '#', 'admin', NOW(), ''),
+('告警规则修改', @rule_id, '3', '', '', '', 'F', '0', '0', 'monitor:rule:edit', '#', 'admin', NOW(), ''),
+('告警规则删除', @rule_id, '4', '', '', '', 'F', '0', '0', 'monitor:rule:remove', '#', 'admin', NOW(), '');
 
 -- =============================================
 -- 产品菜单收敛：从 RuoYi 模板后台调整为企业 IT 运维平台

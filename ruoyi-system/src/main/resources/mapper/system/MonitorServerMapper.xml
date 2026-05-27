@@ -147,6 +147,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         UPDATE monitor_server SET last_collect_time = NOW() WHERE id = #{serverId}
     </update>
 
+    <update id="updateCollectStatus">
+        UPDATE monitor_server
+        SET last_collect_time = #{lastCollectTime},
+            monitor_status = #{monitorStatus},
+            connection_status = #{connectionStatus},
+            update_time = NOW()
+        WHERE id = #{serverId}
+    </update>
+
     <delete id="deleteMonitorServerById" parameterType="Long">
         UPDATE monitor_server SET del_flag = '1' WHERE id = #{id}
     </delete>

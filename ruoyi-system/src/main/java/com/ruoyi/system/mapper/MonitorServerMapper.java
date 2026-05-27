@@ -23,6 +23,9 @@ public interface MonitorServerMapper {
 
     public int updateCollectTime(Long serverId);
 
+    public int updateCollectStatus(@Param("serverId") Long serverId, @Param("monitorStatus") String monitorStatus,
+            @Param("connectionStatus") String connectionStatus, @Param("lastCollectTime") java.util.Date lastCollectTime);
+
     public int deleteMonitorServerById(Long id);
 
     public int deleteMonitorServerByIds(Long[] ids);

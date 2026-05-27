@@ -20,6 +20,8 @@ public interface IMonitorDataService {
 
     public int insertMonitorData(MonitorData monitorData);
 
+    public MonitorData reportMonitorData(MonitorData monitorData);
+
     public int deleteMonitorDataById(Long id);
 
     public int deleteMonitorDataByIds(Long[] ids);

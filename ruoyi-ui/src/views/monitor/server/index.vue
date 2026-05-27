@@ -72,10 +72,13 @@
           <span>{{ parseTime(scope.row.lastCollectTime) || '-' }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="210">
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="280">
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-data-line" @click="handleMonitor(scope.row)" v-hasPermi="['monitor:data:query']">
             监控
+          </el-button>
+          <el-button size="mini" type="text" icon="el-icon-upload2" @click="handleMockReport(scope.row)" v-hasPermi="['monitor:data:add']">
+            上报
           </el-button>
           <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)" v-hasPermi="['monitor:server:edit']">
             编辑
@@ -241,7 +244,7 @@
 <script>
 import * as echarts from 'echarts'
 import { listServer, getServer, addServer, updateServer, delServer } from "@/api/monitor/server"
-import { getRecentData, getLatestData } from "@/api/monitor/data"
+import { getRecentData, getLatestData, reportMonitorData } from "@/api/monitor/data"
 import { listAssetInfo } from "@/api/asset/info"
 
 export default {
@@ -375,6 +378,36 @@ export default {
       this.monitorOpen = true
       this.loadMonitorData()
       this.startMonitorTimer()
+    },
+    handleMockReport(row) {
+      const cpuUsage = this.randomMetric(25, 92)
+      const memoryUsage = this.randomMetric(35, 94)
+      const diskUsage = this.randomMetric(45, 96)
+      const payload = {
+        serverId: row.id,
+        serverIp: row.serverIp,
+        cpuUsage,
+        memoryUsage,
+        diskUsage,
+        memoryTotalGb: row.memoryGb || null,
+        diskTotalGb: row.diskGb || null,
+        memoryUsedGb: row.memoryGb ? Number((row.memoryGb * memoryUsage / 100).toFixed(2)) : null,
+        diskUsedGb: row.diskGb ? Number((row.diskGb * diskUsage / 100).toFixed(2)) : null,
+        networkIn: this.randomMetric(80, 280),
+        networkOut: this.randomMetric(60, 220),
+        loadAverage: '0.42, 0.48, 0.55',
+        runningProcesses: Math.floor(this.randomMetric(90, 180))
+      }
+      reportMonitorData(payload).then(() => {
+        this.$modal.msgSuccess('监控数据已上报')
+        this.getList()
+        if (this.monitorOpen && this.monitorServer.id === row.id) {
+          this.loadMonitorData()
+        }
+      })
+    },
+    randomMetric(min, max) {
+      return Number((Math.random() * (max - min) + min).toFixed(2))
     },
     loadMonitorData() {
       getLatestData(this.monitorServer.id).then(response => {

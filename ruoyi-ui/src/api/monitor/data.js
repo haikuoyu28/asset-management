@@ -25,3 +25,18 @@ export function getRecentData(serverId, limit) {
     params: { limit: limit }
   })
 }
+
+export function reportMonitorData(data) {
+  return request({
+    url: '/monitor/data/report',
+    method: 'post',
+    data: data
+  })
+}
+
+export function delMonitorData(id) {
+  return request({
+    url: '/monitor/data/' + id,
+    method: 'delete'
+  })
+}

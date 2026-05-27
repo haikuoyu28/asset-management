@@ -169,6 +169,33 @@ CREATE TABLE `monitor_alarm` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='监控告警表';
 
 -- =============================================
+-- 表6: monitor_alarm_rule - 告警规则表
+-- =============================================
+DROP TABLE IF EXISTS `monitor_alarm_rule`;
+CREATE TABLE `monitor_alarm_rule` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '规则ID',
+  `rule_name` varchar(128) NOT NULL COMMENT '规则名称',
+  `alarm_type` char(1) NOT NULL COMMENT '告警类型（1CPU 2内存 3磁盘）',
+  `alarm_level` char(1) NOT NULL DEFAULT '2' COMMENT '告警级别（1提示 2警告 3严重）',
+  `compare_operator` varchar(8) NOT NULL DEFAULT '>=' COMMENT '比较符',
+  `threshold_value` decimal(8,2) NOT NULL COMMENT '阈值',
+  `scope_type` char(1) NOT NULL DEFAULT '0' COMMENT '作用范围（0全部服务器 1指定服务器）',
+  `server_id` bigint DEFAULT NULL COMMENT '指定服务器ID',
+  `silent_minutes` int NOT NULL DEFAULT 30 COMMENT '静默分钟数',
+  `enabled` char(1) NOT NULL DEFAULT '0' COMMENT '启用状态（0启用 1停用）',
+  `remark` varchar(512) DEFAULT NULL COMMENT '备注',
+  `del_flag` char(1) NOT NULL DEFAULT '0' COMMENT '删除标志（0存在 1删除）',
+  `create_by` varchar(64) DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) DEFAULT '' COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_alarm_type` (`alarm_type`),
+  KEY `idx_rule_enabled` (`enabled`),
+  KEY `idx_rule_scope` (`scope_type`, `server_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='告警规则表';
+
+-- =============================================
 -- 初始化数据：资产类型字典
 -- =============================================
 INSERT INTO `sys_dict_type` (`dict_name`, `dict_type`, `status`, `create_by`, `create_time`, `remark`) VALUES
@@ -265,12 +292,21 @@ INSERT INTO `sys_dict_data` (`dict_sort`, `dict_label`, `dict_value`, `dict_type
 (4, '已忽略', '3', 'alarm_status', NULL, 'info', 'N', '0', 'admin', NOW());
 
 -- =============================================
+-- 初始化数据：默认告警规则
+-- =============================================
+INSERT INTO `monitor_alarm_rule` (`rule_name`, `alarm_type`, `alarm_level`, `compare_operator`, `threshold_value`, `scope_type`, `silent_minutes`, `enabled`, `create_by`, `create_time`, `remark`) VALUES
+('CPU 使用率过高', '1', '2', '>=', 85.00, '0', 30, '0', 'admin', NOW(), '默认 CPU 阈值规则'),
+('内存使用率过高', '2', '2', '>=', 90.00, '0', 30, '0', 'admin', NOW(), '默认内存阈值规则'),
+('磁盘使用率过高', '3', '3', '>=', 90.00, '0', 60, '0', 'admin', NOW(), '默认磁盘阈值规则');
+
+-- =============================================
 -- 创建索引以提高查询性能
 -- =============================================
 CREATE INDEX idx_asset_create_time ON asset_info(create_time);
 CREATE INDEX idx_asset_dept_status ON asset_info(dept_id, status);
 CREATE INDEX idx_monitor_data_server_time ON monitor_data(server_id, collect_time);
 CREATE INDEX idx_alarm_server_status ON monitor_alarm(server_id, alarm_status);
+CREATE INDEX idx_rule_enabled_scope ON monitor_alarm_rule(enabled, scope_type, server_id);
 
 -- =============================================
 -- Navicat操作说明：
