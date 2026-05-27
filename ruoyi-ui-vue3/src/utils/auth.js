@@ -6,6 +6,14 @@ export function getToken() {
   return target ? decodeURIComponent(target.split('=').slice(1).join('=')) : ''
 }
 
+export function setToken(token) {
+  document.cookie = `${TOKEN_KEY}=${encodeURIComponent(token)}; path=/`
+}
+
+export function removeToken() {
+  document.cookie = `${TOKEN_KEY}=; path=/; max-age=0`
+}
+
 export function hasToken() {
   return Boolean(getToken())
 }

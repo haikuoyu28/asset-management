@@ -25,9 +25,10 @@
         </button>
         <div>
           <strong>{{ route.meta.title || '运维平台' }}</strong>
-          <span>Vue3 迁移预览版</span>
+          <span>{{ user.name || 'Vue3 迁移预览版' }}</span>
         </div>
-        <a class="legacy-link" :href="legacyHome">返回现有系统</a>
+        <a class="legacy-link" :href="legacyHome">现有系统</a>
+        <button class="logout-button" type="button" @click="handleLogout">退出</button>
       </header>
 
       <RouterView />
@@ -40,8 +41,10 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { DataBoard, Monitor, Odometer, Warning, Collection, Fold, Expand } from '@element-plus/icons-vue'
 import { useAppStore } from '@/stores/app'
+import { useUserStore } from '@/stores/user'
 
 const app = useAppStore()
+const user = useUserStore()
 const route = useRoute()
 const legacyBase = import.meta.env.VITE_APP_LEGACY_BASE || '/'
 const legacyHome = computed(() => `${legacyBase.replace(/\/$/, '')}/index`)
@@ -53,4 +56,11 @@ const navItems = [
   { label: '监控数据', path: '/ops-monitor/data', icon: Odometer },
   { label: '告警事件', path: '/ops-monitor/alarm', icon: Warning }
 ]
+
+user.loadUserInfo().catch(() => {})
+
+async function handleLogout() {
+  await user.logout()
+  window.location.href = '/login'
+}
 </script>

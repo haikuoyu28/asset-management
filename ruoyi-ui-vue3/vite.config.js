@@ -7,6 +7,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [vue()],
+    cacheDir: '.vite-cache',
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url))

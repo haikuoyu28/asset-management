@@ -165,6 +165,16 @@ button {
   text-decoration: none;
 }
 
+.logout-button {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #344054;
+  font-weight: 700;
+}
+
 .app-shell.collapsed {
   grid-template-columns: 78px minmax(0, 1fr);
 }
@@ -655,6 +665,206 @@ button {
   line-height: 1.7;
 }
 
+.login-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(420px, 0.8fr);
+  min-height: 100vh;
+  background: #101820;
+}
+
+.login-visual {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 64px;
+  background:
+    linear-gradient(135deg, rgba(16, 24, 32, 0.94), rgba(20, 53, 72, 0.86)),
+    radial-gradient(circle at 24% 24%, rgba(75, 224, 181, 0.18), transparent 32%),
+    #101820;
+  color: #ffffff;
+}
+
+.login-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 56px;
+}
+
+.login-brand span {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 8px;
+  background: #1aa37a;
+  font-weight: 800;
+}
+
+.login-brand strong {
+  font-size: 18px;
+}
+
+.login-visual h1 {
+  max-width: 760px;
+  margin: 0;
+  font-size: 44px;
+  line-height: 1.18;
+}
+
+.login-visual p {
+  max-width: 680px;
+  margin: 20px 0 0;
+  color: #b8c3cf;
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+.login-points {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 34px;
+}
+
+.login-points span {
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #d0f5ea;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.login-card {
+  align-self: center;
+  width: min(460px, calc(100% - 42px));
+  margin: 0 auto;
+  padding: 34px;
+  border: 1px solid #e4e7ec;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.26);
+}
+
+.login-card h2 {
+  margin: 0;
+  font-size: 26px;
+}
+
+.login-card p {
+  margin: 8px 0 26px;
+  color: #667085;
+}
+
+.captcha-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 124px;
+  gap: 10px;
+  width: 100%;
+}
+
+.captcha-image {
+  overflow: hidden;
+  height: 40px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.captcha-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.login-button {
+  width: 100%;
+}
+
+.module-page {
+  padding: 22px;
+}
+
+.module-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 164px;
+  padding: 28px;
+  border-radius: 8px;
+  color: #ffffff;
+  box-shadow: 0 16px 42px rgba(24, 34, 48, 0.14);
+}
+
+.module-hero.asset {
+  background: linear-gradient(135deg, #10233f, #164d63 58%, #1f6f55);
+}
+
+.module-hero.server {
+  background: linear-gradient(135deg, #182230, #24466a 58%, #2b5c47);
+}
+
+.module-hero.data {
+  background: linear-gradient(135deg, #122033, #22436b 58%, #384b82);
+}
+
+.module-hero.alarm {
+  background: linear-gradient(135deg, #221821, #693331 58%, #8a4b24);
+}
+
+.module-hero h1 {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1.2;
+}
+
+.module-hero p {
+  max-width: 760px;
+  margin: 14px 0 0;
+  color: #d1d9e2;
+  line-height: 1.7;
+}
+
+.module-panel {
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px solid #e4e7ec;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 12px 30px rgba(16, 24, 40, 0.08);
+}
+
+.filter-bar {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(160px, 1fr)) auto auto;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.ops-table {
+  width: 100%;
+}
+
+.module-panel .el-pagination {
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 14px;
+}
+
+.form-grid .el-select,
+.form-grid .el-input-number {
+  width: 100%;
+}
+
 @media (max-width: 1280px) {
   .metric-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -687,6 +897,7 @@ button {
   }
 
   .hero,
+  .module-hero,
   .placeholder-panel {
     display: block;
   }
@@ -707,6 +918,21 @@ button {
   .state-pills {
     justify-content: flex-start;
   }
+
+  .filter-bar,
+  .form-grid,
+  .login-page {
+    grid-template-columns: 1fr;
+  }
+
+  .login-visual {
+    min-height: 420px;
+    padding: 36px 24px;
+  }
+
+  .login-visual h1 {
+    font-size: 32px;
+  }
 }
 
 @media (max-width: 560px) {
@@ -719,7 +945,8 @@ button {
   }
 
   .page-pad,
-  .workbench-page {
+  .workbench-page,
+  .module-page {
     padding: 14px;
   }
 
