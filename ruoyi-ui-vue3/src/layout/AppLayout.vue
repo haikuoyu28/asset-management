@@ -39,7 +39,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { DataBoard, Monitor, Odometer, Warning, Collection, Fold, Expand } from '@element-plus/icons-vue'
+import { DataBoard, Monitor, Odometer, Warning, Collection, Fold, Expand, Tickets, SetUp } from '@element-plus/icons-vue'
 import { useAppStore } from '@/stores/app'
 import { useUserStore } from '@/stores/user'
 
@@ -52,9 +52,11 @@ const legacyHome = computed(() => `${legacyBase.replace(/\/$/, '')}/index`)
 const navItems = [
   { label: '运维总览', path: '/index', icon: DataBoard },
   { label: '设备资产', path: '/asset/info', icon: Collection },
+  { label: '资产变更', path: '/asset/flow', icon: Tickets },
   { label: '服务器管理', path: '/ops-monitor/server', icon: Monitor },
   { label: '监控数据', path: '/ops-monitor/data', icon: Odometer },
-  { label: '告警事件', path: '/ops-monitor/alarm', icon: Warning }
+  { label: '告警事件', path: '/ops-monitor/alarm', icon: Warning },
+  { label: '告警规则', path: '/ops-monitor/rule', icon: SetUp }
 ]
 
 user.loadUserInfo().catch(() => {})

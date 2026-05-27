@@ -10,9 +10,11 @@
   - 登录 `/login`
   - 运维总览 `/index`
   - 设备资产 `/asset/info`
+  - 资产变更 `/asset/flow`
   - 服务器管理 `/ops-monitor/server`
   - 监控数据 `/ops-monitor/data`
   - 告警事件 `/ops-monitor/alarm`
+  - 告警规则 `/ops-monitor/rule`
 - 已复用接口：
   - `/login`
   - `/captchaImage`
@@ -27,8 +29,11 @@
   - `/monitor/alarm/list`
   - `/monitor/alarm/handle/{id}`
   - `/monitor/alarm/ignore/{id}`
+  - `/monitor/rule/list`
+  - `/monitor/rule`
 - 会话策略：沿用当前 RuoYi 的 `Admin-Token` Cookie
 - 兼容策略：当前 Vue2 前端继续作为生产入口，Vue3 前端作为迁移预览入口
+- 部署策略：新增 `Dockerfile.frontend-vue3` 和 `docker-compose.vue3.yml`，可独立启动 Vue3 预览服务
 
 ## 本阶段不做
 
@@ -43,11 +48,10 @@
 
 1. 接入后端菜单接口，建立 Vue3 动态路由和权限指令。
 2. 抽象字典、分页、表单弹窗、导出下载等公共能力。
-3. 迁移资产变更页面，补齐生命周期操作记录。
-4. 迁移告警规则页面，形成阈值配置入口。
-5. 新增独立 Dockerfile 和 Compose override，先作为预览服务运行。
-6. 验收通过后再替换当前 `frontend` 服务。
-7. 开始 AIOps 数据建模、异常检测和智能告警降噪。
+3. 迁移系统管理必要页面：用户、角色、菜单、操作日志、登录日志。
+4. 强化资产选择器、服务器选择器和表单校验。
+5. 验收通过后再替换当前 `frontend` 服务。
+6. 开始 AIOps 数据建模、异常检测和智能告警降噪。
 
 ## 本地验证
 

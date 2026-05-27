@@ -15,8 +15,9 @@
 | 服务器管理 | 已完成主流程 | 资产关联、连接状态、监控状态、Agent Token、服务器规格维护 |
 | 监控数据 | 已完成主流程 | CPU、内存、磁盘、网络、负载、进程、采集时间列表 |
 | 告警事件 | 已完成主流程 | 告警筛选、处理、忽略、闭环记录 |
+| 告警规则 | 已完成主流程 | 阈值规则、范围、等级、沉默时间、启停状态 |
 | Agent 上报 | 已具备基础链路 | Token、心跳、指标上报、离线告警、恢复自动关闭 |
-| Vue3 迁移 | 进行中 | 已有登录、运维总览和核心运维页面，暂未切换生产入口 |
+| Vue3 迁移 | 进行中 | 已有登录、核心运维页面和 Docker 预览入口，暂未切换生产入口 |
 
 ## 技术栈
 
@@ -78,6 +79,18 @@ docker compose logs -f backend
 ```text
 前端：http://localhost
 后端：http://localhost:8080
+```
+
+Vue3 预览前端可以通过 Compose override 单独启动：
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.vue3.yml up -d --build frontend-vue3
+```
+
+默认访问：
+
+```text
+Vue3 预览：http://localhost:5173
 ```
 
 `.env`、`docker/mysql/data/`、`docker/redis/data/`、`node_modules/`、前端构建产物均不会进入 Git。

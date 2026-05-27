@@ -1,0 +1,13 @@
+services:
+  frontend-vue3:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend-vue3
+    container_name: asset-frontend-vue3
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_VUE3_PORT:-5173}:80"
+    networks:
+      - asset-network

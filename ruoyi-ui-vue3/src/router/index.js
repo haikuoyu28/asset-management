@@ -3,9 +3,11 @@ import AppLayout from '@/layout/AppLayout.vue'
 import WorkbenchIndex from '@/views/workbench/Index.vue'
 import Login from '@/views/login/Login.vue'
 import AssetInfo from '@/views/asset/AssetInfo.vue'
+import AssetFlow from '@/views/asset/AssetFlow.vue'
 import Server from '@/views/monitor/Server.vue'
 import MonitorData from '@/views/monitor/MonitorData.vue'
 import Alarm from '@/views/monitor/Alarm.vue'
+import Rule from '@/views/monitor/Rule.vue'
 import { hasToken } from '@/utils/auth'
 
 const routes = [
@@ -33,6 +35,12 @@ const routes = [
         meta: { title: '设备资产' }
       },
       {
+        path: 'asset/flow',
+        name: 'AssetFlowMigration',
+        component: AssetFlow,
+        meta: { title: '资产变更' }
+      },
+      {
         path: 'ops-monitor/server',
         name: 'MonitorServerMigration',
         component: Server,
@@ -49,6 +57,12 @@ const routes = [
         name: 'MonitorAlarmMigration',
         component: Alarm,
         meta: { title: '告警事件' }
+      },
+      {
+        path: 'ops-monitor/rule',
+        name: 'MonitorRuleMigration',
+        component: Rule,
+        meta: { title: '告警规则' }
       }
     ]
   }

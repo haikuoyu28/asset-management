@@ -8,6 +8,9 @@ docker/uploadPath
 docker/registry/data
 ruoyi-ui/node_modules
 ruoyi-ui/dist
+ruoyi-ui-vue3/node_modules
+ruoyi-ui-vue3/dist
+ruoyi-ui-vue3/.vite-cache
 **/target
 asset-management-code-for-hr
 hr-desktop-copy-check

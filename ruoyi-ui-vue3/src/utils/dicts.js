@@ -45,6 +45,28 @@ export const alarmTypeOptions = [
   { label: '其他', value: 'other' }
 ]
 
+export const flowTypeOptions = [
+  { label: '领用', value: '1', type: 'primary' },
+  { label: '归还', value: '2', type: 'success' },
+  { label: '报修', value: '3', type: 'warning' },
+  { label: '维修', value: '4', type: 'warning' },
+  { label: '巡检', value: '5', type: 'info' },
+  { label: '报废', value: '6', type: 'danger' }
+]
+
+export const compareOperatorOptions = [
+  { label: '大于', value: '>' },
+  { label: '大于等于', value: '>=' },
+  { label: '小于', value: '<' },
+  { label: '小于等于', value: '<=' },
+  { label: '等于', value: '=' }
+]
+
+export const scopeTypeOptions = [
+  { label: '全部服务器', value: 'all' },
+  { label: '指定服务器', value: 'server' }
+]
+
 export function optionLabel(options, value) {
   return options.find(item => item.value === String(value))?.label || value || '-'
 }
