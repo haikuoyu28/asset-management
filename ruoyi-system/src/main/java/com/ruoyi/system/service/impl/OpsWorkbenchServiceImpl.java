@@ -31,6 +31,8 @@ public class OpsWorkbenchServiceImpl implements IOpsWorkbenchService {
         summary.put("resourceSeries", buildResourceSeries(opsWorkbenchMapper.selectRecentMonitorMetrics()));
         summary.put("alarmEvents", opsWorkbenchMapper.selectRecentAlarms());
         summary.put("assetFlows", opsWorkbenchMapper.selectRecentAssetFlows());
+        summary.put("alarmStatusSummary", buildAlarmStatusSummary(opsWorkbenchMapper.selectAlarmStatusSummary()));
+        summary.put("riskServers", opsWorkbenchMapper.selectTopRiskServers());
         return summary;
     }
 
@@ -83,5 +85,28 @@ public class OpsWorkbenchServiceImpl implements IOpsWorkbenchService {
         series.put("memory", memory);
         series.put("disk", disk);
         return series;
+    }
+
+    private Map<String, Object> buildAlarmStatusSummary(List<Map<String, Object>> rows) {
+        Map<String, Object> summary = new HashMap<>();
+        summary.put("unhandled", 0);
+        summary.put("processing", 0);
+        summary.put("handled", 0);
+        summary.put("ignored", 0);
+
+        for (Map<String, Object> row : rows) {
+            String status = String.valueOf(row.get("alarmStatus"));
+            Object total = row.get("total");
+            if ("0".equals(status)) {
+                summary.put("unhandled", total);
+            } else if ("1".equals(status)) {
+                summary.put("processing", total);
+            } else if ("2".equals(status)) {
+                summary.put("handled", total);
+            } else if ("3".equals(status)) {
+                summary.put("ignored", total);
+            }
+        }
+        return summary;
     }
 }

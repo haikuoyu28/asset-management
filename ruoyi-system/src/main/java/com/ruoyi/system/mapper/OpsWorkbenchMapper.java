@@ -22,4 +22,8 @@ public interface OpsWorkbenchMapper {
     List<Map<String, Object>> selectRecentAssetFlows();
 
     List<Map<String, Object>> selectRecentMonitorMetrics();
+
+    List<Map<String, Object>> selectAlarmStatusSummary();
+
+    List<Map<String, Object>> selectTopRiskServers();
 }

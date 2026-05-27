@@ -59,6 +59,57 @@
       </article>
     </section>
 
+    <section class="risk-grid">
+      <article class="panel risk-panel">
+        <div class="panel-header">
+          <div>
+            <h2>风险服务器</h2>
+            <span>按活跃告警、离线状态和监控异常排序</span>
+          </div>
+          <button class="ghost-button" @click="go('/ops-monitor/server')">查看服务器</button>
+        </div>
+        <div v-if="riskServers.length" class="risk-list">
+          <div v-for="server in riskServers" :key="server.id" class="risk-row">
+            <div class="risk-main">
+              <strong>{{ server.serverIp }}</strong>
+              <span>{{ server.hostname || '未命名服务器' }}</span>
+            </div>
+            <div class="risk-metrics">
+              <span>CPU {{ server.cpuUsage }}</span>
+              <span>内存 {{ server.memoryUsage }}</span>
+              <span>磁盘 {{ server.diskUsage }}</span>
+            </div>
+            <div class="risk-state">
+              <span :class="['state-pill', server.connectionStatus === '0' ? 'online' : 'offline']">
+                {{ server.connectionStatusText }}
+              </span>
+              <span :class="['state-pill', server.monitorStatus === '0' ? 'normal' : 'abnormal']">
+                {{ server.monitorStatusText }}
+              </span>
+              <strong>{{ server.activeAlarmCount }} 告警</strong>
+            </div>
+          </div>
+        </div>
+        <el-empty v-else description="暂无风险服务器" :image-size="80" />
+      </article>
+
+      <article class="panel status-panel">
+        <div class="panel-header">
+          <div>
+            <h2>告警状态</h2>
+            <span>当前事件处理闭环分布</span>
+          </div>
+          <button class="ghost-button danger" @click="go('/ops-monitor/alarm')">告警事件</button>
+        </div>
+        <div class="status-card-grid">
+          <div v-for="item in alarmStatusCards" :key="item.key" :class="['status-card', item.type]">
+            <span>{{ item.label }}</span>
+            <strong>{{ item.value }}</strong>
+          </div>
+        </div>
+      </article>
+    </section>
+
     <section class="bottom-grid">
       <article class="panel alert-panel">
         <div class="panel-header">
@@ -146,6 +197,13 @@ export default {
       ],
       alarmEvents: [],
       assetFlows: [],
+      riskServers: [],
+      alarmStatusSummary: {
+        unhandled: 0,
+        processing: 0,
+        handled: 0,
+        ignored: 0
+      },
       quickActions: [
         { label: '设备资产', path: '/asset/info', icon: 'list' },
         { label: '服务器管理', path: '/ops-monitor/server', icon: 'server' },
@@ -161,6 +219,14 @@ export default {
         { key: 'servers', label: '服务器数', value: this.summary.serverTotal, icon: 'server', trend: `${this.summary.onlineRate}% 在线`, trendType: 'good' },
         { key: 'alarms', label: '待处理告警', value: this.summary.alarmTotal, icon: 'bug', trend: this.summary.alarmTotal > 0 ? '需要关注' : '正常', trendType: this.summary.alarmTotal > 0 ? 'danger' : 'good' },
         { key: 'flows', label: '资产变更', value: this.summary.flowTotal, icon: 'time', trend: '生命周期', trendType: 'stable' }
+      ]
+    },
+    alarmStatusCards() {
+      return [
+        { key: 'unhandled', label: '未处理', value: this.alarmStatusSummary.unhandled, type: 'danger' },
+        { key: 'processing', label: '处理中', value: this.alarmStatusSummary.processing, type: 'warning' },
+        { key: 'handled', label: '已处理', value: this.alarmStatusSummary.handled, type: 'good' },
+        { key: 'ignored', label: '已忽略', value: this.alarmStatusSummary.ignored, type: 'stable' }
       ]
     }
   },
@@ -210,6 +276,8 @@ export default {
         this.resourceSeries = this.normalizeResourceSeries(data.resourceSeries)
         this.alarmEvents = (data.alarmEvents || []).map(this.normalizeAlarm)
         this.assetFlows = (data.assetFlows || []).map(this.normalizeFlow)
+        this.riskServers = (data.riskServers || []).map(this.normalizeRiskServer)
+        this.alarmStatusSummary = this.normalizeAlarmStatusSummary(data.alarmStatusSummary)
         this.refreshCharts()
       }).catch(() => {
         this.refreshCharts()
@@ -243,9 +311,42 @@ export default {
         time: item.operateTime || ''
       }
     },
+    normalizeRiskServer(item, index) {
+      const connectionStatus = String(item.connectionStatus || '1')
+      const monitorStatus = String(item.monitorStatus || '2')
+      return {
+        id: item.id || index,
+        serverIp: item.serverIp || '-',
+        hostname: item.hostname || '',
+        connectionStatus,
+        monitorStatus,
+        connectionStatusText: connectionStatus === '0' ? '在线' : '离线',
+        monitorStatusText: monitorStatus === '0' ? '正常' : monitorStatus === '1' ? '异常' : '未知',
+        activeAlarmCount: this.toNumber(item.activeAlarmCount),
+        cpuUsage: this.formatMetric(item.cpuUsage),
+        memoryUsage: this.formatMetric(item.memoryUsage),
+        diskUsage: this.formatMetric(item.diskUsage),
+        lastCollectTime: item.lastCollectTime || ''
+      }
+    },
+    normalizeAlarmStatusSummary(summary) {
+      const data = summary || {}
+      return {
+        unhandled: this.toNumber(data.unhandled),
+        processing: this.toNumber(data.processing),
+        handled: this.toNumber(data.handled),
+        ignored: this.toNumber(data.ignored)
+      }
+    },
     toNumber(value) {
       const parsed = Number(value)
       return Number.isFinite(parsed) ? parsed : 0
+    },
+    formatMetric(value) {
+      if (value === null || value === undefined || value === '') {
+        return '-'
+      }
+      return `${this.toNumber(value)}%`
     },
     mapAlarmLevel(level) {
       const value = String(level || '').toLowerCase()
@@ -529,6 +630,7 @@ export default {
 }
 
 .main-grid,
+.risk-grid,
 .bottom-grid {
   display: grid;
   gap: 18px;
@@ -541,6 +643,10 @@ export default {
 
 .bottom-grid {
   grid-template-columns: 1.1fr 0.8fr 1.1fr;
+}
+
+.risk-grid {
+  grid-template-columns: minmax(0, 1.6fr) minmax(300px, 0.8fr);
 }
 
 .panel {
@@ -626,6 +732,118 @@ export default {
   &.good { background: #48d6a8; }
   &.warn { background: #f4c45a; }
   &.bad { background: #ff6b6b; }
+}
+
+.risk-list {
+  display: grid;
+  gap: 12px;
+}
+
+.risk-row {
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) minmax(240px, 1.2fr) minmax(220px, 0.9fr);
+  gap: 16px;
+  align-items: center;
+  min-height: 66px;
+  padding: 12px 14px;
+  border: 1px solid #eef2f6;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.risk-main {
+  min-width: 0;
+
+  strong {
+    display: block;
+    color: #172033;
+    font-size: 15px;
+  }
+
+  span {
+    display: block;
+    overflow: hidden;
+    margin-top: 6px;
+    color: #8a96a3;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.risk-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  span {
+    padding: 5px 8px;
+    border-radius: 6px;
+    background: #edf2f7;
+    color: #506174;
+    font-size: 12px;
+  }
+}
+
+.risk-state {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+
+  strong {
+    color: #d64242;
+    font-size: 13px;
+  }
+}
+
+.state-pill {
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+
+  &.online,
+  &.normal {
+    color: #0f8f68;
+    background: #e8f8f2;
+  }
+
+  &.offline,
+  &.abnormal {
+    color: #d64242;
+    background: #fff0f0;
+  }
+}
+
+.status-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.status-card {
+  min-height: 92px;
+  padding: 16px;
+  border-radius: 8px;
+  background: #f8fafc;
+
+  span {
+    color: #64748b;
+    font-size: 13px;
+  }
+
+  strong {
+    display: block;
+    margin-top: 12px;
+    font-size: 30px;
+    line-height: 1;
+  }
+
+  &.danger strong { color: #f05252; }
+  &.warning strong { color: #d97706; }
+  &.good strong { color: #0f8f68; }
+  &.stable strong { color: #506174; }
 }
 
 .event-list,
@@ -748,6 +966,7 @@ export default {
   }
 
   .main-grid,
+  .risk-grid,
   .bottom-grid {
     grid-template-columns: 1fr;
   }
@@ -779,6 +998,14 @@ export default {
 
   .quick-grid {
     grid-template-columns: 1fr;
+  }
+
+  .risk-row {
+    grid-template-columns: 1fr;
+  }
+
+  .risk-state {
+    justify-content: flex-start;
   }
 }
 </style>

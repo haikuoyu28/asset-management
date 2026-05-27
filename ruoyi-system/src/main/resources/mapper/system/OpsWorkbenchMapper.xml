@@ -80,4 +80,55 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         LIMIT 6
     </select>
 
+    <select id="selectAlarmStatusSummary" resultType="java.util.HashMap">
+        SELECT alarm_status AS alarmStatus,
+               COUNT(1) AS total
+        FROM monitor_alarm
+        WHERE del_flag = '0'
+        GROUP BY alarm_status
+    </select>
+
+    <select id="selectTopRiskServers" resultType="java.util.HashMap">
+        SELECT ms.id,
+               ms.server_ip AS serverIp,
+               ms.hostname,
+               ms.connection_status AS connectionStatus,
+               ms.monitor_status AS monitorStatus,
+               DATE_FORMAT(ms.last_collect_time, '%Y-%m-%d %H:%i') AS lastCollectTime,
+               COALESCE(alarm_stats.active_alarm_count, 0) AS activeAlarmCount,
+               latest.cpu_usage AS cpuUsage,
+               latest.memory_usage AS memoryUsage,
+               latest.disk_usage AS diskUsage
+        FROM monitor_server ms
+        LEFT JOIN (
+            SELECT server_id,
+                   COUNT(1) AS active_alarm_count
+            FROM monitor_alarm
+            WHERE del_flag = '0'
+              AND alarm_status IN ('0', '1')
+            GROUP BY server_id
+        ) alarm_stats ON alarm_stats.server_id = ms.id
+        LEFT JOIN (
+            SELECT md.server_id,
+                   md.cpu_usage,
+                   md.memory_usage,
+                   md.disk_usage,
+                   md.collect_time
+            FROM monitor_data md
+            INNER JOIN (
+                SELECT server_id,
+                       MAX(collect_time) AS collect_time
+                FROM monitor_data
+                GROUP BY server_id
+            ) latest_time ON latest_time.server_id = md.server_id
+                         AND latest_time.collect_time = md.collect_time
+        ) latest ON latest.server_id = ms.id
+        WHERE ms.del_flag = '0'
+        ORDER BY COALESCE(alarm_stats.active_alarm_count, 0) DESC,
+                 CASE WHEN ms.connection_status = '1' THEN 0 ELSE 1 END,
+                 CASE WHEN ms.monitor_status = '1' THEN 0 WHEN ms.monitor_status = '2' THEN 1 ELSE 2 END,
+                 ms.last_collect_time ASC
+        LIMIT 5
+    </select>
+
 </mapper>
