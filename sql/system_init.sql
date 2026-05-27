@@ -417,6 +417,42 @@ INSERT INTO `sys_menu` (
 ('告警删除', @alarm_id, '4', '', '', 'F', '0', '0', 'monitor:alarm:remove', '#', 'admin', NOW(), '');
 
 -- =============================================
+-- 产品菜单收敛：从 RuoYi 模板后台调整为企业 IT 运维平台
+-- =============================================
+UPDATE `sys_menu` SET `menu_name` = '资产中心', `order_num` = 10, `visible` = '0', `status` = '0', `icon` = 'list'
+WHERE `parent_id` = 0 AND `path` = 'asset';
+
+UPDATE `sys_menu` SET `menu_name` = '设备资产', `order_num` = 1, `visible` = '0', `status` = '0'
+WHERE `parent_id` = @parent_id AND `path` = 'info';
+
+UPDATE `sys_menu` SET `menu_name` = '资产变更', `order_num` = 2, `visible` = '0', `status` = '0'
+WHERE `parent_id` = @parent_id AND `path` = 'flow';
+
+UPDATE `sys_menu` SET `menu_name` = '监控中心', `order_num` = 20, `visible` = '0', `status` = '0', `icon` = 'monitor'
+WHERE `menu_id` = @monitor_parent_id;
+
+UPDATE `sys_menu` SET `menu_name` = '告警事件', `order_num` = 3, `visible` = '0', `status` = '0'
+WHERE `parent_id` = @monitor_parent_id AND `path` = 'alarm';
+
+UPDATE `sys_menu` SET `menu_name` = '平台管理', `order_num` = 90, `visible` = '0', `status` = '0', `icon` = 'system'
+WHERE `menu_id` = 1;
+
+UPDATE `sys_menu` SET `menu_name` = '用户管理', `order_num` = 1, `visible` = '0', `status` = '0'
+WHERE `menu_id` = 100;
+
+UPDATE `sys_menu` SET `menu_name` = '角色权限', `order_num` = 2, `visible` = '0', `status` = '0'
+WHERE `menu_id` = 101;
+
+UPDATE `sys_menu` SET `menu_name` = '菜单配置', `order_num` = 3, `visible` = '0', `status` = '0'
+WHERE `menu_id` = 102;
+
+UPDATE `sys_menu` SET `menu_name` = '日志审计', `order_num` = 4, `visible` = '0', `status` = '0'
+WHERE `menu_id` = 108;
+
+UPDATE `sys_menu` SET `visible` = '1'
+WHERE `menu_id` IN (2, 3, 103, 104, 105, 106, 107, 109, 110, 111, 112, 113, 114, 115, 116, 117);
+
+-- =============================================
 -- 为管理员角色分配所有权限
 -- =============================================
 
