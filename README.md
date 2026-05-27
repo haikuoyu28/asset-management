@@ -1,131 +1,190 @@
 # 企业 IT 设备与服务器资产管理平台
 
-基于 RuoYi-Vue 二次开发的企业 IT 资产管理系统，面向设备台账、资产流转、服务器监控、系统权限和运维基础数据管理等场景。
+基于 RuoYi-Vue 二次开发的企业 IT 资产管理系统，面向设备台账、资产流转、服务器监控、告警处理、系统权限和运维基础数据管理等场景。
 
-## 项目状态
-
-当前仓库已经补充 Docker 部署配置，并在 Windows + Docker Desktop 环境下完成验证。
-
-已验证服务：
-
-| 服务 | 容器名 | 默认访问 |
-| --- | --- | --- |
-| 前端 Nginx | `asset-frontend` | http://localhost |
-| 后端服务 | `asset-backend` | http://localhost:8080 |
-| MySQL | `asset-mysql` | localhost:3307 |
-| Redis | `asset-redis` | localhost:6379 |
-
-说明：MySQL 容器内部端口仍是 `3306`，宿主机默认映射到 `3307`，用于避开本机已有 MySQL 的 `3306` 端口占用。
-
-## 技术栈
-
-### 后端
-
-| 技术 | 版本 / 说明 |
-| --- | --- |
-| Java | 17 |
-| Spring Boot | 4.0.3 |
-| RuoYi | 3.9.2 |
-| MyBatis / MyBatis Spring Boot | MyBatis 体系 |
-| Druid | 数据库连接池 |
-| MySQL | 8.0 |
-| Redis | 7-alpine |
-| Quartz | 定时任务 |
-| Spring Security | 权限认证 |
-
-### 前端
-
-| 技术 | 版本 / 说明 |
-| --- | --- |
-| Vue | 2.6.12 |
-| Element UI | 2.15.14 |
-| Vue Router | 3.4.9 |
-| Vuex | 3.6.0 |
-| Axios | 0.30.3 |
-| Vue CLI | 4.4.6 |
+项目采用 Spring Boot + Vue 2 前后端分离架构，保留 RuoYi 的用户、角色、菜单、字典、日志、定时任务和代码生成能力，并扩展了资产管理与服务器监控业务模块。
 
 ## 功能模块
 
-- 系统管理：用户、角色、菜单、部门、岗位、字典、参数配置。
-- 权限认证：登录认证、角色权限、菜单权限、接口权限控制。
-- 资产管理：设备资产信息、资产状态、资产流转记录。
-- 服务器监控：服务器信息、监控数据、告警记录。
-- 定时任务：基于 Quartz 的任务配置与执行。
-- 日志审计：登录日志、操作日志。
-- 代码生成：沿用 RuoYi 代码生成能力。
+| 模块 | 说明 |
+| --- | --- |
+| 系统管理 | 用户、角色、菜单、部门、岗位、字典、参数配置 |
+| 资产管理 | 设备资产信息维护、查询、导出、详情查看 |
+| 资产流程 | 资产领用、归还、报修、维修、巡检、报废等流转记录 |
+| 运维监控 | 服务器管理、监控数据、监控告警 |
+| 定时任务 | Quartz 任务配置与执行日志 |
+| 日志审计 | 登录日志、操作日志 |
+| 代码生成 | 基于 RuoYi 的代码生成能力 |
 
-## 目录结构
+## 技术栈
+
+| 分类 | 技术 | 版本 / 说明 |
+| --- | --- | --- |
+| 后端 | Java | 17 |
+| 后端 | Spring Boot | 4.0.3 |
+| 后端 | RuoYi | 3.9.2 |
+| 后端 | MyBatis | 持久层框架 |
+| 后端 | Druid | 数据库连接池与数据监控 |
+| 后端 | MySQL | 8.0 |
+| 后端 | Redis | 7 |
+| 后端 | Quartz | 定时任务 |
+| 后端 | Spring Security | 登录认证与权限控制 |
+| 后端 | Springdoc OpenAPI | 接口文档 |
+| 前端 | Vue | 2.6.12 |
+| 前端 | Vue CLI | 4.4.6 |
+| 前端 | Element UI | 2.15.14 |
+| 前端 | Vue Router | 3.4.9 |
+| 前端 | Vuex | 3.6.0 |
+| 前端 | Axios | 0.30.3 |
+| 前端 | ECharts | 5.4.0 |
+
+## 项目结构
 
 ```text
 asset-management/
-├── ruoyi-admin/          # 后端启动模块
-├── ruoyi-common/         # 通用工具模块
-├── ruoyi-framework/      # 框架核心模块
-├── ruoyi-generator/      # 代码生成模块
+├── ruoyi-admin/          # 后端启动模块与 Web 控制器
+├── ruoyi-common/         # 通用工具、注解、常量和基础实体
+├── ruoyi-framework/      # 安全认证、数据权限、Web 配置等框架能力
+├── ruoyi-generator/      # RuoYi 代码生成模块
 ├── ruoyi-quartz/         # 定时任务模块
-├── ruoyi-system/         # 系统业务模块
-├── ruoyi-ui/             # Vue 2 前端项目
+├── ruoyi-system/         # 系统管理、资产管理、监控管理业务模块
+├── ruoyi-ui/             # Vue 2 + Element UI 前端项目
 ├── sql/                  # 数据库初始化脚本
-├── docker/               # Nginx 配置和运行数据目录
+├── docker/               # Nginx 配置与运行数据目录
 ├── docker-compose.yml    # Docker Compose 编排文件
-├── Dockerfile.backend    # 后端运行镜像
-├── Dockerfile.frontend   # 前端 Nginx 镜像
-
-
-## 快速启动：Docker
-
-### 1. 克隆项目
-
-```bash
-git clone https://github.com/haikuoyu28/asset-management.git
-cd asset-management
+├── Dockerfile.backend    # 后端镜像构建文件
+├── Dockerfile.frontend   # 前端镜像构建文件
+└── README.md
 ```
 
-### 2. 准备构建产物
+## 快速启动
 
-当前 Dockerfile 使用运行时镜像，要求本地已经存在：
+### 环境要求
+
+- JDK 17
+- Maven 3.8+
+- Node.js 16 或 18 LTS
+- npm
+- MySQL 8.0
+- Redis 7.x
+
+前端依赖基于 Vue CLI 4 和 Vue 2，建议优先使用 Node.js 16 或 18 LTS。
+
+### 初始化数据库
+
+创建数据库 `ry_cloud`，然后按顺序导入：
 
 ```text
-ruoyi-admin/target/ruoyi-admin.jar
-ruoyi-ui/dist/
+sql/ry_20260417.sql
+sql/quartz.sql
+sql/asset_monitor_tables.sql
+sql/system_init.sql
 ```
 
-如果是全新克隆，先构建后端：
+### 启动后端
+
+本地开发可通过环境变量覆盖数据库和 Redis 配置：
+
+```bash
+MYSQL_HOST=localhost
+MYSQL_PORT=3306
+MYSQL_DATABASE=ry_cloud
+MYSQL_USERNAME=root
+MYSQL_PASSWORD=your-db-password
+REDIS_HOST=localhost
+REDIS_PORT=6379
+TOKEN_SECRET=change-me-to-a-long-random-string
+DRUID_LOGIN_USERNAME=ruoyi
+DRUID_LOGIN_PASSWORD=your-druid-password
+```
+
+构建并启动：
 
 ```bash
 mvn clean package -DskipTests
+java -jar ruoyi-admin/target/ruoyi-admin.jar
 ```
 
-再构建前端：
+后端默认地址：
+
+```text
+http://localhost:8080
+```
+
+### 启动前端
 
 ```bash
 cd ruoyi-ui
 npm install --registry=https://registry.npmmirror.com
-npm run build:prod
-cd ..
+npm run dev
 ```
+
+前端开发服务默认通过 `/dev-api` 代理到后端。
+
+## Docker 部署
+
+Docker Compose 编排包含 MySQL、Redis、后端服务和前端 Nginx。
+
+### 1. 准备环境变量
+
+复制示例文件并修改密码、密钥和镜像仓库地址：
+
+```bash
+cp .env.example .env
+```
+
+关键变量：
+
+```env
+REGISTRY=localhost:5000
+VERSION=latest
+
+MYSQL_ROOT_PASSWORD=change-me
+MYSQL_USERNAME=root
+MYSQL_PASSWORD=change-me
+MYSQL_DATABASE=ry_cloud
+MYSQL_PORT=3306
+
+REDIS_PORT=6379
+REDIS_PASSWORD=
+
+TOKEN_SECRET=change-me-to-a-long-random-string
+DRUID_LOGIN_USERNAME=ruoyi
+DRUID_LOGIN_PASSWORD=change-me
+
+BACKEND_PORT=8080
+FRONTEND_PORT=80
+```
+
+真实 `.env` 已被 `.gitignore` 排除，不要提交到仓库。
+
+### 2. 构建并推送镜像
+
+Windows PowerShell：
+
+```powershell
+.\build-and-push.ps1 -Registry localhost:5000 -Version latest
+```
+
+脚本会构建并推送：
+
+```text
+asset-management-backend
+asset-management-frontend
+```
+
+前端镜像会在 Docker 构建阶段执行 `npm install` 和 `npm run build:prod`，不需要提交 `ruoyi-ui/dist`。
 
 ### 3. 启动服务
 
 ```bash
-docker compose up -d --build
+docker compose up -d
 ```
 
-启动完成后访问：
-
-```text
-http://localhost
-```
-
-### 4. 查看状态
+查看状态和日志：
 
 ```bash
 docker compose ps
-```
-
-查看后端日志：
-
-```bash
 docker compose logs -f backend
 ```
 
@@ -135,121 +194,41 @@ docker compose logs -f backend
 docker compose down
 ```
 
-## 环境变量
+## 默认账号
 
-仓库包含默认 `.env`：
+| 用户名 | 密码 | 说明 |
+| --- | --- | --- |
+| `admin` | `admin123` | 超级管理员 |
 
-```env
-MYSQL_PORT=3307
-```
+首次公开部署后，请立即修改默认密码，并替换生产环境中的数据库密码、Druid 密码和 Token 密钥。
 
-可按需增加：
+## 数据监控
 
-```env
-FRONTEND_PORT=8081
-BACKEND_PORT=8082
-MYSQL_ROOT_PASSWORD=change-me
-MYSQL_DATABASE=ry_cloud
-REDIS_PASSWORD=
-TOKEN_SECRET=change-me-to-a-long-random-string
-DRUID_LOGIN_USERNAME=ruoyi
-DRUID_LOGIN_PASSWORD=change-me
-```
-
-修改端口后重新启动：
-
-```bash
-docker compose up -d
-```
-
-## 数据库初始化
-
-首次启动 MySQL 容器时会自动创建数据库并执行：
+数据监控页面使用 Druid：
 
 ```text
-sql/ry_20260417.sql
-sql/quartz.sql
-sql/asset_monitor_tables.sql
-sql/system_init.sql
+系统监控 -> 数据监控
 ```
 
-首次初始化期间，后端可能短暂出现 MySQL `Connection refused` 日志。这通常是 MySQL 还在初始化，等待容器自动重启恢复即可。
-
-数据目录：
-
-| 目录 | 说明 |
-| --- | --- |
-| `docker/mysql/data/` | MySQL 数据 |
-| `docker/redis/data/` | Redis 数据 |
-| `docker/uploadPath/` | 后端上传文件 |
-
-这些目录已被 `.gitignore` 排除，不会提交到仓库。
-
-## Docker Hub 拉取失败处理
-
-如果构建时出现：
+直接访问：
 
 ```text
-failed to fetch oauth token
-failed to authorize
+http://localhost:8080/druid/login.html
 ```
 
-可以先通过镜像代理拉取基础镜像：
-
-```bash
-docker pull m.daocloud.io/docker.io/library/nginx:1.25-alpine
-docker pull m.daocloud.io/docker.io/library/eclipse-temurin:17-jre
-
-docker tag m.daocloud.io/docker.io/library/nginx:1.25-alpine nginx:1.25-alpine
-docker tag m.daocloud.io/docker.io/library/eclipse-temurin:17-jre eclipse-temurin:17-jre
-```
-
-然后重新启动：
-
-```bash
-docker compose up -d --build
-```
-
-## 本地开发启动
-
-### 后端
-
-确保本机已启动 MySQL 和 Redis，并导入 `sql/` 下的初始化脚本。
-
-默认配置支持环境变量覆盖：
-
-```bash
-MYSQL_HOST=localhost
-MYSQL_PORT=3306
-MYSQL_DATABASE=ry_cloud
-MYSQL_USERNAME=root
-MYSQL_PASSWORD=change-me
-REDIS_HOST=localhost
-REDIS_PORT=6379
-```
-
-启动后端：
-
-```bash
-mvn clean package -DskipTests
-java -jar ruoyi-admin/target/ruoyi-admin.jar
-```
-
-### 前端
-
-```bash
-cd ruoyi-ui
-npm install --registry=https://registry.npmmirror.com
-npm run dev
-```
-
-生产构建：
-
-```bash
-npm run build:prod
-```
+Druid 登录账号密码由 `.env` 中的 `DRUID_LOGIN_USERNAME` 和 `DRUID_LOGIN_PASSWORD` 控制。
 
 ## 常见问题
+
+### PowerShell 无法执行 npm
+
+如果 PowerShell 提示 `npm.ps1` 被执行策略阻止，可以使用：
+
+```powershell
+npm.cmd install
+npm.cmd run dev
+npm.cmd run build:prod
+```
 
 ### 端口被占用
 
@@ -257,50 +236,35 @@ Windows 下可检查常用端口：
 
 ```powershell
 Get-NetTCPConnection -State Listen |
-  Where-Object { $_.LocalPort -in 80,8080,3306,3307,6379 } |
+  Where-Object { $_.LocalPort -in 80,8080,3306,6379 } |
   Select-Object LocalAddress,LocalPort,OwningProcess
 ```
 
-如果 `80` 被占用，在 `.env` 中设置：
+如需修改端口，在 `.env` 中调整：
 
 ```env
 FRONTEND_PORT=8081
-```
-
-如果 `8080` 被占用，在 `.env` 中设置：
-
-```env
 BACKEND_PORT=8082
+MYSQL_PORT=3307
+REDIS_PORT=6380
 ```
 
 ### 重新初始化数据库
 
-先停止服务：
+Docker 部署下数据库数据位于：
 
-```bash
-docker compose down
+```text
+docker/mysql/data/
 ```
 
-再清理 `docker/mysql/data/` 后重新启动。清理前请确认没有需要保留的数据。
+如需重新初始化，先备份数据，再停止服务并清理该目录。
 
-### 后端启动后无法连接数据库
+## 发布说明
 
-检查 MySQL 容器状态：
+- `.env` 不进入 Git，也已从当前可达 Git 历史中移除。
+- `target/`、`ruoyi-ui/dist/`、`node_modules/`、Docker 数据目录均被忽略。
+- 默认登录账号用于初始化体验，生产环境必须修改。
 
-```bash
-docker compose ps
-docker compose logs -f mysql
-```
+## 许可证
 
-确认日志中出现 MySQL ready 后，再查看后端：
-
-```bash
-docker compose logs -f backend
-```
-
-## 默认账号
-
-| 用户名 | 密码 | 说明 |
-| --- | --- | --- |
-| `admin` | `admin123` | 超级管理员 |
-
+本项目基于 RuoYi 二次开发，遵循仓库中的 [LICENSE](LICENSE)。
