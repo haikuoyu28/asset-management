@@ -5,6 +5,8 @@ import Layout from '@/layout/index'
 import ParentView from '@/components/ParentView'
 import InnerLink from '@/layout/components/InnerLink'
 
+const hiddenMenuPaths = ['http://ruoyi.vip']
+
 const permission = {
   state: {
     routes: [],
@@ -34,8 +36,8 @@ const permission = {
       return new Promise(resolve => {
         // 向后端请求路由数据
         getRouters().then(res => {
-          const sdata = JSON.parse(JSON.stringify(res.data))
-          const rdata = JSON.parse(JSON.stringify(res.data))
+          const sdata = removeHiddenMenuRoutes(JSON.parse(JSON.stringify(res.data)))
+          const rdata = removeHiddenMenuRoutes(JSON.parse(JSON.stringify(res.data)))
           const sidebarRoutes = filterAsyncRouter(sdata)
           const rewriteRoutes = filterAsyncRouter(rdata, false, true)
           const asyncRoutes = filterDynamicRoutes(dynamicRoutes)
@@ -50,6 +52,15 @@ const permission = {
       })
     }
   }
+}
+
+function removeHiddenMenuRoutes(routes) {
+  return routes.filter(route => !hiddenMenuPaths.includes(route.path)).map(route => {
+    if (route.children && route.children.length) {
+      route.children = removeHiddenMenuRoutes(route.children)
+    }
+    return route
+  })
 }
 
 // 遍历后台传来的路由字符串，转换为组件对象

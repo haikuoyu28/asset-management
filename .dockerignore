@@ -1,9 +1,17 @@
 .git
 .github
 .idea
+.env
 docker/mysql/data
 docker/redis/data
 docker/uploadPath
+docker/registry/data
 ruoyi-ui/node_modules
+ruoyi-ui/dist
+**/target
+asset-management-code-for-hr
+hr-desktop-copy-check
+hr-desktop-zip-check
+hr-ops-code-package
 **/.DS_Store
 *.log

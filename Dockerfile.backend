@@ -1,9 +1,42 @@
-FROM eclipse-temurin:17-jre
+FROM maven:3.9-eclipse-temurin-17-alpine AS builder
+
+WORKDIR /build
+
+COPY pom.xml .
+COPY ruoyi-admin/pom.xml ruoyi-admin/
+COPY ruoyi-common/pom.xml ruoyi-common/
+COPY ruoyi-framework/pom.xml ruoyi-framework/
+COPY ruoyi-generator/pom.xml ruoyi-generator/
+COPY ruoyi-quartz/pom.xml ruoyi-quartz/
+COPY ruoyi-system/pom.xml ruoyi-system/
+
+RUN mvn dependency:go-offline -B
+
+COPY ruoyi-admin/src ruoyi-admin/src
+COPY ruoyi-common/src ruoyi-common/src
+COPY ruoyi-framework/src ruoyi-framework/src
+COPY ruoyi-generator/src ruoyi-generator/src
+COPY ruoyi-quartz/src ruoyi-quartz/src
+COPY ruoyi-system/src ruoyi-system/src
+
+RUN mvn clean package -DskipTests -B
+
+FROM eclipse-temurin:17-jre-alpine
+
+RUN apk add --no-cache curl tzdata
+
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 WORKDIR /app
 
-COPY ruoyi-admin/target/ruoyi-admin.jar app.jar
+COPY --from=builder /build/ruoyi-admin/target/*.jar app.jar
+
+RUN mkdir -p /home/ruoyi/uploadPath
 
 EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
+  CMD curl -f http://localhost:8080/actuator/health || exit 1
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

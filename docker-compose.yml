@@ -4,7 +4,7 @@ services:
     container_name: asset-mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in .env}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-ry_cloud}
       TZ: Asia/Shanghai
     ports:
@@ -19,6 +19,8 @@ services:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_general_ci
       - --default-time-zone=+08:00
+    networks:
+      - asset-network
 
   redis:
     image: redis:7-alpine
@@ -31,39 +33,50 @@ services:
     volumes:
       - ./docker/redis/data:/data
     command: redis-server --appendonly yes
+    networks:
+      - asset-network
 
   backend:
-    build:
-      context: .
-      dockerfile: Dockerfile.backend
+    image: ${REGISTRY:-localhost:5000}/asset-management-backend:${VERSION:-latest}
     container_name: asset-backend
     restart: always
     depends_on:
-      - mysql
-      - redis
+      mysql:
+        condition: service_started
+      redis:
+        condition: service_started
     environment:
       MYSQL_HOST: mysql
       MYSQL_PORT: 3306
       MYSQL_DATABASE: ${MYSQL_DATABASE:-ry_cloud}
-      MYSQL_USERNAME: root
-      MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
+      MYSQL_USERNAME: ${MYSQL_USERNAME:-root}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?set MYSQL_PASSWORD in .env}
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      TOKEN_SECRET: ${TOKEN_SECRET:?set TOKEN_SECRET in .env}
+      DRUID_LOGIN_USERNAME: ${DRUID_LOGIN_USERNAME:?set DRUID_LOGIN_USERNAME in .env}
+      DRUID_LOGIN_PASSWORD: ${DRUID_LOGIN_PASSWORD:?set DRUID_LOGIN_PASSWORD in .env}
       RUOYI_PROFILE: /home/ruoyi/uploadPath
       TZ: Asia/Shanghai
     ports:
       - "${BACKEND_PORT:-8080}:8080"
     volumes:
       - ./docker/uploadPath:/home/ruoyi/uploadPath
+    networks:
+      - asset-network
 
   frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile.frontend
+    image: ${REGISTRY:-localhost:5000}/asset-management-frontend:${VERSION:-latest}
     container_name: asset-frontend
     restart: always
     depends_on:
       - backend
     ports:
       - "${FRONTEND_PORT:-80}:80"
+    networks:
+      - asset-network
+
+networks:
+  asset-network:
+    driver: bridge
