@@ -18,25 +18,18 @@
 
 ## 技术栈
 
-| 分类 | 技术 | 版本 / 说明 |
-| --- | --- | --- |
-| 后端 | Java | 17 |
-| 后端 | Spring Boot | 4.0.3 |
-| 后端 | RuoYi | 3.9.2 |
-| 后端 | MyBatis | 持久层框架 |
-| 后端 | Druid | 数据库连接池与数据监控 |
-| 后端 | MySQL | 8.0 |
-| 后端 | Redis | 7 |
-| 后端 | Quartz | 定时任务 |
-| 后端 | Spring Security | 登录认证与权限控制 |
-| 后端 | Springdoc OpenAPI | 接口文档 |
-| 前端 | Vue | 2.6.12 |
-| 前端 | Vue CLI | 4.4.6 |
-| 前端 | Element UI | 2.15.14 |
-| 前端 | Vue Router | 3.4.9 |
-| 前端 | Vuex | 3.6.0 |
-| 前端 | Axios | 0.30.3 |
-| 前端 | ECharts | 5.4.0 |
+| 前端 | 版本 / 说明 | 后端 | 版本 / 说明 |
+| --- | --- | --- | --- |
+| Vue | 2.6.12 | Java | 17 |
+| Vue CLI | 4.4.6 | Spring Boot | 4.0.3 |
+| Element UI | 2.15.14 | RuoYi | 3.9.2 |
+| Vue Router | 3.4.9 | MyBatis | 持久层框架 |
+| Vuex | 3.6.0 | Druid | 数据库连接池与数据监控 |
+| Axios | 0.30.3 | MySQL | 8.0 |
+| ECharts | 5.4.0 | Redis | 7 |
+|  |  | Quartz | 定时任务 |
+|  |  | Spring Security | 登录认证与权限控制 |
+|  |  | Springdoc OpenAPI | 接口文档 |
 
 ## 项目结构
 
