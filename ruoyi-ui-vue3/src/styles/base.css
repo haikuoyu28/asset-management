@@ -207,6 +207,116 @@ button {
   height: 18px;
 }
 
+.notice-button {
+  position: relative;
+}
+
+.notice-dot {
+  position: absolute;
+  top: 7px;
+  right: 8px;
+  width: 7px;
+  height: 7px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  background: #f04438;
+}
+
+.notification-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.notification-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.notification-head strong {
+  color: #182230;
+  font-size: 15px;
+}
+
+.notification-head span {
+  color: #667085;
+  font-size: 12px;
+}
+
+.notification-list {
+  display: grid;
+  gap: 8px;
+}
+
+.notification-empty {
+  display: grid;
+  min-height: 74px;
+  place-items: center;
+  border: 1px dashed #d0d5dd;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #667085;
+  font-size: 13px;
+}
+
+.notification-row {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr);
+  gap: 10px;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #eaecf0;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #344054;
+  text-align: left;
+}
+
+.notification-row strong,
+.notification-row small {
+  display: block;
+}
+
+.notification-row small {
+  margin-top: 4px;
+  color: #667085;
+  font-size: 12px;
+}
+
+.notification-level {
+  width: 8px;
+  height: 8px;
+  margin-top: 6px;
+  border-radius: 50%;
+}
+
+.notification-level.danger {
+  background: #f04438;
+}
+
+.notification-level.warning {
+  background: #f79009;
+}
+
+.notification-level.info {
+  background: #1769e0;
+}
+
+.notification-refresh {
+  width: 100%;
+  min-height: 32px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #344054;
+  font-weight: 700;
+}
+
+.notification-refresh:hover {
+  border-color: #1769e0;
+  color: #1769e0;
+}
+
 .topbar-tools {
   display: flex;
   align-items: center;
@@ -1163,6 +1273,42 @@ button {
 .theme-dark .usage-pills span {
   background: #1e293b;
   color: #cbd5e1;
+}
+
+.theme-dark .notice-dot {
+  border-color: #151f2b;
+}
+
+.theme-dark .notification-head strong {
+  color: #f2f6fb;
+}
+
+.theme-dark .notification-head span,
+.theme-dark .notification-row small {
+  color: #94a3b8;
+}
+
+.theme-dark .notification-row {
+  border-color: #263648;
+  background: #101926;
+  color: #d7dde8;
+}
+
+.theme-dark .notification-empty {
+  border-color: #334155;
+  background: #101926;
+  color: #94a3b8;
+}
+
+.theme-dark .notification-refresh {
+  border-color: #334155;
+  background: #101926;
+  color: #d7dde8;
+}
+
+.theme-dark .notification-refresh:hover {
+  border-color: #76b8ff;
+  color: #76b8ff;
 }
 
 @media (max-width: 1280px) {

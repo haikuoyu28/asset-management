@@ -5,7 +5,6 @@
 /build/
 !gradle/wrapper/gradle-wrapper.jar
 node_modules/
-ruoyi-ui/dist/
 ruoyi-ui-vue3/dist/
 ruoyi-ui-vue3/.vite-cache/
 

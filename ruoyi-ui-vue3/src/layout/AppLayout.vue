@@ -12,6 +12,11 @@
       </div>
 
       <nav class="nav-list" aria-label="主导航">
+        <RouterLink to="/index" class="nav-item">
+          <DataBoard />
+          <span>首页</span>
+        </RouterLink>
+
         <template v-for="item in menus" :key="item.path">
           <button v-if="item.children?.length" type="button" class="nav-item nav-parent" @click="toggleGroup(item.path)">
             <component :is="item.icon" />
@@ -46,7 +51,7 @@
           <Expand v-else />
         </button>
         <div class="topbar-title">
-          <strong>运维 AI 助手平台</strong>
+          <strong>IT设备管理平台</strong>
           <span>{{ route.meta.title || '运维平台' }}</span>
         </div>
         <div class="topbar-tools">
@@ -63,9 +68,36 @@
           <button class="icon-button" type="button" title="暗色模式" :class="{ active: app.theme === 'dark' }" @click="app.setTheme('dark')">
             <Moon />
           </button>
-          <button class="icon-button" type="button" title="通知">
-            <Bell />
-          </button>
+          <el-popover placement="bottom-end" trigger="click" width="320" popper-class="notification-popover">
+            <template #reference>
+              <button class="icon-button notice-button" type="button" title="通知">
+                <Bell />
+                <span v-if="notifications.length" class="notice-dot"></span>
+              </button>
+            </template>
+            <div class="notification-panel">
+              <div class="notification-head">
+                <strong>通知</strong>
+                <span>{{ notifications.length ? `${notifications.length} 条未读` : '无未读' }}</span>
+              </div>
+              <div v-if="notificationLoading" class="notification-empty">正在加载通知...</div>
+              <div v-else-if="!notifications.length" class="notification-empty">暂无新通知</div>
+              <div v-else class="notification-list">
+                <article
+                  v-for="item in notifications"
+                  :key="item.id"
+                  class="notification-row"
+                >
+                  <span :class="['notification-level', item.level]"></span>
+                  <span>
+                    <strong>{{ item.title }}</strong>
+                    <small>{{ item.desc }}</small>
+                  </span>
+                </article>
+              </div>
+              <button class="notification-refresh" type="button" @click="loadNotifications">刷新通知</button>
+            </div>
+          </el-popover>
         </div>
 
         <el-dropdown trigger="click" @command="handleUserCommand">
@@ -95,11 +127,12 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   ArrowDown,
   Bell,
+  DataBoard,
   Expand,
   Fold,
   Monitor,
@@ -111,6 +144,7 @@ import {
 import { useAppStore } from '@/stores/app'
 import { usePermissionStore } from '@/stores/permission'
 import { useUserStore } from '@/stores/user'
+import { listAlarm } from '@/api/monitor/alarm'
 
 const app = useAppStore()
 const permission = usePermissionStore()
@@ -118,11 +152,14 @@ const user = useUserStore()
 const route = useRoute()
 const router = useRouter()
 const openGroups = ref(['/asset', '/ops-monitor'])
-const menus = computed(() => permission.menus)
+const menus = computed(() => permission.menus.filter(item => item.path !== '/index'))
 const avatarText = computed(() => (user.name || 'A').slice(0, 1).toUpperCase())
+const notifications = ref([])
+const notificationLoading = ref(false)
 
 user.loadUserInfo().catch(() => {})
 permission.loadMenus()
+onMounted(loadNotifications)
 
 function toggleGroup(path) {
   if (app.collapsed) {
@@ -131,6 +168,28 @@ function toggleGroup(path) {
   openGroups.value = openGroups.value.includes(path)
     ? openGroups.value.filter(item => item !== path)
     : openGroups.value.concat(path)
+}
+
+async function loadNotifications() {
+  notificationLoading.value = true
+  try {
+    const response = await listAlarm({ pageNum: 1, pageSize: 5, alarmStatus: '0' })
+    notifications.value = (response.rows || []).map(normalizeAlarmNotification)
+  } catch (error) {
+    notifications.value = []
+  } finally {
+    notificationLoading.value = false
+  }
+}
+
+function normalizeAlarmNotification(item, index) {
+  const level = String(item.alarmLevel || '')
+  return {
+    id: item.id || index,
+    level: level === '3' ? 'danger' : level === '2' ? 'warning' : 'info',
+    title: item.alarmMessage || `${item.serverIp || item.hostname || '服务器'} 产生告警`,
+    desc: `${item.serverIp || item.hostname || '未知对象'} · ${item.alarmTime || '刚刚'}`
+  }
 }
 
 async function handleUserCommand(command) {

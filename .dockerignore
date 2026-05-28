@@ -6,8 +6,6 @@ docker/mysql/data
 docker/redis/data
 docker/uploadPath
 docker/registry/data
-ruoyi-ui/node_modules
-ruoyi-ui/dist
 ruoyi-ui-vue3/node_modules
 ruoyi-ui-vue3/dist
 ruoyi-ui-vue3/.vite-cache
