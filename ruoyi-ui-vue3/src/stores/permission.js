@@ -13,7 +13,7 @@ import {
 import { getRouters } from '@/api/menu'
 
 const routeTitleMap = {
-  '/index': '运维总览',
+  '/index': '首页',
   '/asset/info': '设备资产',
   '/asset/flow': '资产变更',
   '/ops-monitor/server': '服务器管理',
@@ -33,7 +33,7 @@ const routeIconMap = {
 }
 
 const fallbackMenus = [
-  { title: '工作台', path: '/index', icon: DataBoard },
+  { title: '首页', path: '/index', icon: DataBoard },
   {
     title: '资产中心',
     path: '/asset',
@@ -103,7 +103,7 @@ function normalizeMenus(routes, parentPath = '') {
       }
 
       return {
-        title: route.meta?.title || routeTitleMap[fullPath] || route.name || '菜单',
+        title: routeTitleMap[fullPath] || route.meta?.title || route.name || '菜单',
         path: knownPath || fullPath,
         icon: routeIconMap[knownPath || fullPath] || routeIconMap[children[0]?.path] || DataBoard,
         children

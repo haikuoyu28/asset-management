@@ -23,7 +23,7 @@ export const useUserStore = defineStore('user', {
       }
       const response = await getInfo()
       const user = response.user || {}
-      this.name = user.nickName || user.userName || '运维用户'
+      this.name = user.nickName || user.userName || 'Ops User'
       this.roles = response.roles || []
       this.permissions = response.permissions || []
     },

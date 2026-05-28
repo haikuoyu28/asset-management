@@ -7,7 +7,7 @@
         </div>
         <div class="brand-copy">
           <strong>Asset Ops</strong>
-          <span>Ops Platform</span>
+          <span>AIOps Console</span>
         </div>
       </div>
 
@@ -46,27 +46,47 @@
           <Expand v-else />
         </button>
         <div class="topbar-title">
-          <strong>运维AI助手平台</strong>
+          <strong>运维 AI 助手平台</strong>
           <span>{{ route.meta.title || '运维平台' }}</span>
         </div>
         <div class="topbar-tools">
-          <button class="icon-button" type="button" title="明亮模式">
+          <button class="icon-button" type="button" title="明亮模式" :class="{ active: app.theme === 'light' }" @click="app.setTheme('light')">
             <Sunny />
           </button>
-          <button class="switch-button" type="button" aria-label="主题开关"></button>
-          <button class="icon-button" type="button" title="夜间模式">
+          <button
+            class="switch-button"
+            type="button"
+            :class="{ dark: app.theme === 'dark' }"
+            :aria-label="app.theme === 'dark' ? '切换到明亮模式' : '切换到暗色模式'"
+            @click="app.toggleTheme"
+          ></button>
+          <button class="icon-button" type="button" title="暗色模式" :class="{ active: app.theme === 'dark' }" @click="app.setTheme('dark')">
             <Moon />
           </button>
           <button class="icon-button" type="button" title="通知">
             <Bell />
           </button>
         </div>
-        <div class="user-chip">
-          <span>{{ avatarText }}</span>
-          <strong>{{ user.name || 'admin' }}</strong>
-        </div>
-        <a class="legacy-link" :href="legacyHome">现有系统</a>
-        <button class="logout-button" type="button" @click="handleLogout">退出</button>
+
+        <el-dropdown trigger="click" @command="handleUserCommand">
+          <button class="user-chip" type="button">
+            <span>{{ avatarText }}</span>
+            <strong>{{ user.name || 'admin' }}</strong>
+            <ArrowDown />
+          </button>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="profile">
+                <UserFilled />
+                <span>个人中心</span>
+              </el-dropdown-item>
+              <el-dropdown-item divided command="logout">
+                <SwitchButton />
+                <span>退出登录</span>
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
       </header>
 
       <RouterView />
@@ -76,8 +96,18 @@
 
 <script setup>
 import { computed, ref } from 'vue'
-import { useRoute } from 'vue-router'
-import { ArrowDown, Bell, Expand, Fold, Monitor, Moon, Sunny } from '@element-plus/icons-vue'
+import { useRoute, useRouter } from 'vue-router'
+import {
+  ArrowDown,
+  Bell,
+  Expand,
+  Fold,
+  Monitor,
+  Moon,
+  Sunny,
+  SwitchButton,
+  UserFilled
+} from '@element-plus/icons-vue'
 import { useAppStore } from '@/stores/app'
 import { usePermissionStore } from '@/stores/permission'
 import { useUserStore } from '@/stores/user'
@@ -86,8 +116,7 @@ const app = useAppStore()
 const permission = usePermissionStore()
 const user = useUserStore()
 const route = useRoute()
-const legacyBase = import.meta.env.VITE_APP_LEGACY_BASE || '/'
-const legacyHome = computed(() => `${legacyBase.replace(/\/$/, '')}/index`)
+const router = useRouter()
 const openGroups = ref(['/asset', '/ops-monitor'])
 const menus = computed(() => permission.menus)
 const avatarText = computed(() => (user.name || 'A').slice(0, 1).toUpperCase())
@@ -104,8 +133,14 @@ function toggleGroup(path) {
     : openGroups.value.concat(path)
 }
 
-async function handleLogout() {
-  await user.logout()
-  window.location.href = '/login'
+async function handleUserCommand(command) {
+  if (command === 'profile') {
+    router.push('/user/profile')
+    return
+  }
+  if (command === 'logout') {
+    await user.logout()
+    window.location.href = '/login'
+  }
 }
 </script>

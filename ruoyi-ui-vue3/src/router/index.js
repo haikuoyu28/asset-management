@@ -8,6 +8,7 @@ import Server from '@/views/monitor/Server.vue'
 import MonitorData from '@/views/monitor/MonitorData.vue'
 import Alarm from '@/views/monitor/Alarm.vue'
 import Rule from '@/views/monitor/Rule.vue'
+import Profile from '@/views/user/Profile.vue'
 import { hasToken } from '@/utils/auth'
 import { usePermissionStore } from '@/stores/permission'
 import { useUserStore } from '@/stores/user'
@@ -28,7 +29,13 @@ const routes = [
         path: 'index',
         name: 'Workbench',
         component: WorkbenchIndex,
-        meta: { title: '运维总览' }
+        meta: { title: '首页' }
+      },
+      {
+        path: 'user/profile',
+        name: 'UserProfile',
+        component: Profile,
+        meta: { title: '个人中心' }
       },
       {
         path: 'asset/info',
@@ -95,7 +102,7 @@ router.beforeEach(async to => {
 })
 
 router.afterEach(to => {
-  document.title = `${to.meta.title || '运维平台'} - ${import.meta.env.VITE_APP_TITLE || '企业IT资产与运维监控平台'}`
+  document.title = `${to.meta.title || '运维平台'} - ${import.meta.env.VITE_APP_TITLE || '企业 IT 资产与运维监控平台'}`
 })
 
 export default router
