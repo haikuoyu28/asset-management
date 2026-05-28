@@ -8,7 +8,7 @@ SET NAMES utf8mb4;
 USE `ry_cloud`;
 
 -- =============================================
--- 任务1：Agent 心跳状态检查（每分钟）
+-- 任务1：SSH 主动采集服务器监控数据（每分钟）
 -- =============================================
 INSERT INTO `sys_job` (
     `job_name`,
@@ -21,15 +21,15 @@ INSERT INTO `sys_job` (
     `create_time`,
     `remark`
 ) VALUES (
-    'Agent心跳状态检查',
+    'SSH监控数据采集',
     'MONITOR',
-    'serverMonitorTask.checkAgentHeartbeat',
+    'serverMonitorTask.collectSshMonitorData',
     '0 */1 * * * ?',
     '3',
     '0',
     'admin',
     NOW(),
-    '每分钟检查Agent心跳，超时后标记离线并生成告警'
+    '每分钟通过SSH主动采集服务器基础运行数据'
 );
 
 -- =============================================

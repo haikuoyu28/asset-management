@@ -59,6 +59,7 @@ services:
       TOKEN_SECRET: ${TOKEN_SECRET:?set TOKEN_SECRET in .env}
       DRUID_LOGIN_USERNAME: ${DRUID_LOGIN_USERNAME:?set DRUID_LOGIN_USERNAME in .env}
       DRUID_LOGIN_PASSWORD: ${DRUID_LOGIN_PASSWORD:?set DRUID_LOGIN_PASSWORD in .env}
+      SSH_CREDENTIAL_KEY: ${SSH_CREDENTIAL_KEY:?set SSH_CREDENTIAL_KEY in .env}
       RUOYI_PROFILE: /home/ruoyi/uploadPath
       TZ: Asia/Shanghai
     ports:

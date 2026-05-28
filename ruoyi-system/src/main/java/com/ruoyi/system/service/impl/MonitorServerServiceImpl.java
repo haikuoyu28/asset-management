@@ -1,25 +1,28 @@
 package com.ruoyi.system.service.impl;
 
-import java.util.List;
-import java.util.UUID;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.ruoyi.system.domain.monitor.MonitorAlarm;
-import com.ruoyi.system.mapper.MonitorAlarmMapper;
-import com.ruoyi.system.mapper.MonitorServerMapper;
-import com.ruoyi.system.domain.monitor.MonitorServer;
-import com.ruoyi.system.service.IMonitorServerService;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.system.domain.monitor.MonitorAlarm;
+import com.ruoyi.system.domain.monitor.MonitorData;
+import com.ruoyi.system.domain.monitor.MonitorServer;
+import com.ruoyi.system.mapper.MonitorAlarmMapper;
+import com.ruoyi.system.mapper.MonitorServerMapper;
+import com.ruoyi.system.service.IMonitorDataService;
+import com.ruoyi.system.service.IMonitorServerService;
+import com.ruoyi.system.service.monitor.SshCredentialCipher;
+import com.ruoyi.system.service.monitor.SshMonitorCollector;
 
 /**
- * 监控服务器Service实现
- *
- * @author ruoyi
+ * 服务器监控Service实现
  */
 @Service
 public class MonitorServerServiceImpl implements IMonitorServerService {
@@ -29,6 +32,15 @@ public class MonitorServerServiceImpl implements IMonitorServerService {
 
     @Autowired
     private MonitorAlarmMapper monitorAlarmMapper;
+
+    @Autowired
+    private IMonitorDataService monitorDataService;
+
+    @Autowired
+    private SshCredentialCipher credentialCipher;
+
+    @Autowired
+    private SshMonitorCollector sshMonitorCollector;
 
     @Override
     public MonitorServer selectMonitorServerById(Long id) {
@@ -48,13 +60,7 @@ public class MonitorServerServiceImpl implements IMonitorServerService {
     @Override
     @Transactional
     public int insertMonitorServer(MonitorServer monitorServer) {
-        if (!checkServerIpUnique(monitorServer)) {
-            throw new ServiceException("服务器IP已存在");
-        }
-        monitorServer.setSshPassword(null);
-        if (StringUtils.isEmpty(monitorServer.getAgentEnabled())) {
-            monitorServer.setAgentEnabled("1");
-        }
+        prepareForSave(monitorServer, true);
         monitorServer.setCreateBy(SecurityUtils.getUsername());
         return monitorServerMapper.insertMonitorServer(monitorServer);
     }
@@ -62,11 +68,7 @@ public class MonitorServerServiceImpl implements IMonitorServerService {
     @Override
     @Transactional
     public int updateMonitorServer(MonitorServer monitorServer) {
-        if (!checkServerIpUnique(monitorServer)) {
-            throw new ServiceException("服务器IP已存在");
-        }
-        monitorServer.setSshPassword(null);
-        monitorServer.setAgentToken(null);
+        prepareForSave(monitorServer, false);
         monitorServer.setUpdateBy(SecurityUtils.getUsername());
         return monitorServerMapper.updateMonitorServer(monitorServer);
     }
@@ -77,34 +79,52 @@ public class MonitorServerServiceImpl implements IMonitorServerService {
     }
 
     @Override
-    @Transactional
-    public MonitorServer resetAgentToken(Long id) {
-        MonitorServer server = monitorServerMapper.selectMonitorServerById(id);
-        if (server == null) {
-            throw new ServiceException("服务器不存在");
-        }
-        String token = UUID.randomUUID().toString().replace("-", "") + UUID.randomUUID().toString().replace("-", "");
-        MonitorServer update = new MonitorServer();
-        update.setId(id);
-        update.setAgentToken(token);
-        update.setAgentEnabled("0");
-        update.setUpdateBy(SecurityUtils.getUsername());
-        monitorServerMapper.updateAgentToken(update);
-        server.setAgentToken(token);
-        server.setAgentEnabled("0");
-        return server;
+    public void testSshConnection(Long id) {
+        MonitorServer server = authServer(id);
+        sshMonitorCollector.testConnection(server);
+        monitorServerMapper.updateCollectStatus(server.getId(), "2", "0", server.getLastCollectTime());
     }
 
     @Override
     @Transactional
-    public int checkAgentHeartbeatTimeout(int timeoutMinutes) {
-        int timeout = timeoutMinutes <= 0 ? 3 : timeoutMinutes;
-        List<MonitorServer> servers = monitorServerMapper.selectAgentHeartbeatTimeoutList(timeout);
-        for (MonitorServer server : servers) {
-            monitorServerMapper.updateAgentOffline(server.getId());
-            createOfflineAlarmIfNeeded(server, timeout);
+    public MonitorData collectSshMonitorData(Long id) {
+        MonitorServer server = authServer(id);
+        try {
+            MonitorData data = sshMonitorCollector.collect(server);
+            return monitorDataService.reportMonitorData(data);
+        } catch (ServiceException e) {
+            markConnectionFailure(server, e.getMessage());
+            throw e;
         }
-        return servers.size();
+    }
+
+    @Override
+    @Transactional
+    public int collectAllSshMonitorData() {
+        List<MonitorServer> servers = monitorServerMapper.selectMonitorServerList(new MonitorServer());
+        int success = 0;
+        for (MonitorServer server : servers) {
+            try {
+                collectSshMonitorData(server.getId());
+                success++;
+            } catch (ServiceException e) {
+                // Scheduled collection keeps moving even if a single host is unreachable.
+            }
+        }
+        return success;
+    }
+
+    @Override
+    public Map<String, Object> executePresetCommand(Long id, String commandKey) {
+        MonitorServer server = authServer(id);
+        String output = sshMonitorCollector.executePresetCommand(server, commandKey);
+        Map<String, Object> result = new HashMap<>();
+        result.put("serverId", server.getId());
+        result.put("serverIp", server.getServerIp());
+        result.put("commandKey", commandKey);
+        result.put("output", output);
+        result.put("executeTime", new Date());
+        return result;
     }
 
     @Override
@@ -123,13 +143,48 @@ public class MonitorServerServiceImpl implements IMonitorServerService {
     public boolean checkServerIpUnique(MonitorServer monitorServer) {
         Long id = StringUtils.isNull(monitorServer.getId()) ? -1L : monitorServer.getId();
         MonitorServer info = monitorServerMapper.selectMonitorServerByIp(monitorServer.getServerIp());
-        if (StringUtils.isNotNull(info) && info.getId().longValue() != id.longValue()) {
-            return false;
-        }
-        return true;
+        return StringUtils.isNull(info) || info.getId().longValue() == id.longValue();
     }
 
-    private void createOfflineAlarmIfNeeded(MonitorServer server, int timeoutMinutes) {
+    private void prepareForSave(MonitorServer monitorServer, boolean insert) {
+        if (StringUtils.isEmpty(monitorServer.getServerIp())) {
+            throw new ServiceException("服务器IP不能为空");
+        }
+        if (!checkServerIpUnique(monitorServer)) {
+            throw new ServiceException("服务器IP已存在");
+        }
+        if (monitorServer.getSshPort() == null) {
+            monitorServer.setSshPort(22);
+        }
+        if (StringUtils.isEmpty(monitorServer.getMonitorStatus())) {
+            monitorServer.setMonitorStatus("2");
+        }
+        if (StringUtils.isEmpty(monitorServer.getConnectionStatus())) {
+            monitorServer.setConnectionStatus("1");
+        }
+        if (StringUtils.isNotEmpty(monitorServer.getSshPassword())) {
+            monitorServer.setSshPassword(credentialCipher.encrypt(monitorServer.getSshPassword()));
+        } else {
+            monitorServer.setSshPassword(null);
+        }
+        if (insert && StringUtils.isEmpty(monitorServer.getHostname())) {
+            monitorServer.setHostname(monitorServer.getServerIp());
+        }
+        monitorServer.setAgentPath(null);
+        monitorServer.setAgentToken(null);
+        monitorServer.setAgentEnabled("1");
+    }
+
+    private MonitorServer authServer(Long id) {
+        MonitorServer server = monitorServerMapper.selectMonitorServerAuthById(id);
+        if (server == null) {
+            throw new ServiceException("服务器不存在");
+        }
+        return server;
+    }
+
+    private void markConnectionFailure(MonitorServer server, String message) {
+        monitorServerMapper.updateConnectionFailure(server.getId());
         if (monitorAlarmMapper.checkAlarmExists(server.getId(), "5") > 0) {
             return;
         }
@@ -139,10 +194,10 @@ public class MonitorServerServiceImpl implements IMonitorServerService {
         alarm.setHostname(server.getHostname());
         alarm.setAlarmType("5");
         alarm.setAlarmLevel("3");
-        alarm.setThresholdValue(new BigDecimal(timeoutMinutes));
-        alarm.setAlarmValue(new BigDecimal(timeoutMinutes));
+        alarm.setThresholdValue(BigDecimal.ONE);
+        alarm.setAlarmValue(BigDecimal.ONE);
         alarm.setAlarmStatus("0");
-        alarm.setAlarmMessage(StringUtils.format("Agent心跳超时超过{}分钟，服务器已标记离线", timeoutMinutes));
+        alarm.setAlarmMessage("SSH连接或采集失败：" + message);
         alarm.setAlarmTime(new Date());
         alarm.setCreateBy("system");
         monitorAlarmMapper.insertMonitorAlarm(alarm);

@@ -32,7 +32,7 @@ service.interceptors.response.use(
     }
 
     if (code === 401) {
-      ElMessage.error('登录状态已过期，请回到现有系统重新登录')
+      ElMessage.error('登录状态已过期，请重新登录')
       return Promise.reject(new Error('Unauthorized'))
     }
 

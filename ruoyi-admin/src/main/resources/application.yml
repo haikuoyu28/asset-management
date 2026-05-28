@@ -45,6 +45,10 @@ user:
     # 密码锁定时间（默认10分钟）
     lockTime: 10
 
+# SSH凭据加密密钥。生产环境必须通过 SSH_CREDENTIAL_KEY 覆盖。
+security:
+  ssh-credential-key: ${SSH_CREDENTIAL_KEY:change-me-local-dev-key}
+
 # Spring配置
 spring:
   # 资源信息

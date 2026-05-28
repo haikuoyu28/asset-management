@@ -2,21 +2,13 @@
   <main class="login-page">
     <section class="login-visual">
       <div class="login-brand">
-        <span>Ops</span>
-        <strong>资产运维平台</strong>
-      </div>
-      <h1>先把运维数据底座打稳，再进入 AIOps。</h1>
-      <p>Vue3 版本正在迁移资产、监控和告警闭环，登录后可进入新版运维总览和核心工作流。</p>
-      <div class="login-points">
-        <span>资产纳管</span>
-        <span>Agent 接入</span>
-        <span>告警闭环</span>
+        <span>IT</span>
+        <strong>IT设备管理平台</strong>
       </div>
     </section>
 
     <section class="login-card">
       <h2>登录平台</h2>
-      <p>使用当前 RuoYi 后端账号登录。</p>
       <el-form ref="formRef" :model="form" :rules="rules" label-position="top" @keyup.enter="handleLogin">
         <el-form-item label="账号" prop="username">
           <el-input v-model="form.username" autocomplete="username" placeholder="请输入账号" size="large" />

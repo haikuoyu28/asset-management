@@ -134,8 +134,7 @@ async function includeMonitor(row) {
     osName: row.model,
     monitorStatus: '2',
     connectionStatus: '1',
-    agentEnabled: '1',
-    agentPath: '/opt/asset-agent',
+    sshPort: 22,
     remark: `由资产 ${row.assetCode || row.id} 纳入监控`
   })
   ElMessage.success('已创建服务器监控对象')

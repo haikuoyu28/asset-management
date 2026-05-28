@@ -11,20 +11,18 @@ import com.ruoyi.system.service.IMonitorServerService;
 @Component("serverMonitorTask")
 public class ServerMonitorTask {
 
-    private static final int DEFAULT_AGENT_TIMEOUT_MINUTES = 3;
-
     @Autowired
     private IMonitorServerService monitorServerService;
 
     @Autowired
     private IMonitorDataService monitorDataService;
 
-    public void checkAgentHeartbeat() {
-        monitorServerService.checkAgentHeartbeatTimeout(DEFAULT_AGENT_TIMEOUT_MINUTES);
+    public void collectSshMonitorData() {
+        monitorServerService.collectAllSshMonitorData();
     }
 
     public void collectMonitorData() {
-        checkAgentHeartbeat();
+        collectSshMonitorData();
     }
 
     public void cleanExpiredData() {

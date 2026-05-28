@@ -2,7 +2,6 @@ package com.ruoyi.common.enums;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.jspecify.annotations.Nullable;
 
 /**
  * 请求方式
@@ -23,8 +22,7 @@ public enum HttpMethod
         }
     }
 
-    @Nullable
-    public static HttpMethod resolve(@Nullable String method)
+    public static HttpMethod resolve(String method)
     {
         return (method != null ? mappings.get(method) : null);
     }

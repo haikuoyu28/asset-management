@@ -38,11 +38,11 @@ export const alarmStatusOptions = [
 ]
 
 export const alarmTypeOptions = [
-  { label: 'CPU', value: 'cpu' },
-  { label: '内存', value: 'memory' },
-  { label: '磁盘', value: 'disk' },
-  { label: '离线', value: 'offline' },
-  { label: '其他', value: 'other' }
+  { label: 'CPU', value: '1' },
+  { label: '内存', value: '2' },
+  { label: '磁盘', value: '3' },
+  { label: '网络', value: '4' },
+  { label: '服务连接', value: '5' }
 ]
 
 export const flowTypeOptions = [
@@ -63,8 +63,8 @@ export const compareOperatorOptions = [
 ]
 
 export const scopeTypeOptions = [
-  { label: '全部服务器', value: 'all' },
-  { label: '指定服务器', value: 'server' }
+  { label: '全部服务器', value: '0' },
+  { label: '指定服务器', value: '1' }
 ]
 
 export function optionLabel(options, value) {

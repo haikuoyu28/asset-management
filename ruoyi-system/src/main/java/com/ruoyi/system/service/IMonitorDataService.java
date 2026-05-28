@@ -22,8 +22,6 @@ public interface IMonitorDataService {
 
     public MonitorData reportMonitorData(MonitorData monitorData);
 
-    public MonitorData reportAgentMonitorData(MonitorData monitorData, String agentToken);
-
     public int deleteMonitorDataById(Long id);
 
     public int deleteMonitorDataByIds(Long[] ids);

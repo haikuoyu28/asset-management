@@ -12,18 +12,16 @@ import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.domain.monitor.MonitorAlarm;
 import com.ruoyi.system.domain.monitor.MonitorAlarmRule;
-import com.ruoyi.system.mapper.MonitorDataMapper;
-import com.ruoyi.system.mapper.MonitorAlarmMapper;
-import com.ruoyi.system.mapper.MonitorAlarmRuleMapper;
-import com.ruoyi.system.mapper.MonitorServerMapper;
 import com.ruoyi.system.domain.monitor.MonitorData;
 import com.ruoyi.system.domain.monitor.MonitorServer;
+import com.ruoyi.system.mapper.MonitorAlarmMapper;
+import com.ruoyi.system.mapper.MonitorAlarmRuleMapper;
+import com.ruoyi.system.mapper.MonitorDataMapper;
+import com.ruoyi.system.mapper.MonitorServerMapper;
 import com.ruoyi.system.service.IMonitorDataService;
 
 /**
  * 监控数据Service实现
- *
- * @author ruoyi
  */
 @Service
 public class MonitorDataServiceImpl implements IMonitorDataService {
@@ -73,13 +71,6 @@ public class MonitorDataServiceImpl implements IMonitorDataService {
     }
 
     @Override
-    @Transactional
-    public MonitorData reportAgentMonitorData(MonitorData monitorData, String agentToken) {
-        MonitorServer server = resolveAgentServer(monitorData, agentToken);
-        return saveMonitorData(server, monitorData);
-    }
-
-    @Override
     public int deleteMonitorDataById(Long id) {
         return monitorDataMapper.deleteMonitorDataById(id);
     }
@@ -104,26 +95,6 @@ public class MonitorDataServiceImpl implements IMonitorDataService {
         }
         if (server == null) {
             throw new ServiceException("未找到对应的监控服务器，请先在服务器管理中纳管该服务器");
-        }
-        return server;
-    }
-
-    private MonitorServer resolveAgentServer(MonitorData monitorData, String agentToken) {
-        if (monitorData.getServerId() == null) {
-            throw new ServiceException("Agent上报必须携带serverId");
-        }
-        if (StringUtils.isEmpty(agentToken)) {
-            throw new ServiceException("Agent Token不能为空");
-        }
-        MonitorServer server = monitorServerMapper.selectMonitorServerAuthById(monitorData.getServerId());
-        if (server == null) {
-            throw new ServiceException("未找到对应的监控服务器");
-        }
-        if (!"0".equals(server.getAgentEnabled()) || StringUtils.isEmpty(server.getAgentToken())) {
-            throw new ServiceException("该服务器未启用Agent上报");
-        }
-        if (!agentToken.equals(server.getAgentToken())) {
-            throw new ServiceException("Agent Token校验失败");
         }
         return server;
     }
@@ -226,7 +197,7 @@ public class MonitorDataServiceImpl implements IMonitorDataService {
     }
 
     private void recoverServiceAlarm(MonitorServer server) {
-        monitorAlarmMapper.recoverActiveAlarm(server.getId(), "5", "Agent 已恢复上报，服务器连接状态恢复在线");
+        monitorAlarmMapper.recoverActiveAlarm(server.getId(), "5", "SSH采集已恢复，服务器连接状态恢复在线");
     }
 
     private String buildAlarmMessage(MonitorServer server, MonitorAlarmRule rule, BigDecimal value) {

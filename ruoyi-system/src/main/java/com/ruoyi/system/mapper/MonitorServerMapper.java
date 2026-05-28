@@ -26,9 +26,7 @@ public interface MonitorServerMapper {
     public int updateCollectStatus(@Param("serverId") Long serverId, @Param("monitorStatus") String monitorStatus,
             @Param("connectionStatus") String connectionStatus, @Param("lastCollectTime") java.util.Date lastCollectTime);
 
-    public List<MonitorServer> selectAgentHeartbeatTimeoutList(@Param("timeoutMinutes") int timeoutMinutes);
-
-    public int updateAgentOffline(@Param("serverId") Long serverId);
+    public int updateConnectionFailure(@Param("serverId") Long serverId);
 
     public int deleteMonitorServerById(Long id);
 
@@ -40,5 +38,4 @@ public interface MonitorServerMapper {
 
     public int checkServerIpUnique(@Param("serverIp") String serverIp, @Param("id") Long id);
 
-    public int updateAgentToken(MonitorServer monitorServer);
 }

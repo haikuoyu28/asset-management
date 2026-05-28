@@ -20,6 +20,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="connectionStatus" column="connection_status"/>
         <result property="sshPort"          column="ssh_port"        />
         <result property="sshUsername"      column="ssh_username"    />
+        <result property="sshPassword"      column="ssh_password"    />
         <result property="agentPath"        column="agent_path"      />
         <result property="agentToken"       column="agent_token"     />
         <result property="agentEnabled"     column="agent_enabled"   />
@@ -76,7 +77,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         SELECT ms.id, ms.asset_id, ai.asset_code, ai.asset_name,
                ms.server_ip, ms.hostname, ms.os_name, ms.cpu_cores, ms.memory_gb, ms.disk_gb,
                ms.monitor_status, ms.last_collect_time, ms.connection_status, ms.ssh_port,
-               ms.ssh_username, ms.agent_path, ms.agent_token, ms.agent_enabled, ms.del_flag, ms.remark,
+               ms.ssh_username, ms.ssh_password, ms.agent_path, ms.agent_token, ms.agent_enabled, ms.del_flag, ms.remark,
                ms.create_by, ms.create_time, ms.update_by, ms.update_time
         FROM monitor_server ms
         LEFT JOIN asset_info ai ON ai.id = ms.asset_id AND ai.del_flag = '0'
@@ -111,6 +112,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="connectionStatus != null">connection_status,</if>
             <if test="sshPort != null">ssh_port,</if>
             <if test="sshUsername != null">ssh_username,</if>
+            <if test="sshPassword != null and sshPassword != ''">ssh_password,</if>
             <if test="agentPath != null">agent_path,</if>
             <if test="agentEnabled != null">agent_enabled,</if>
             <if test="remark != null">remark,</if>
@@ -128,6 +130,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="connectionStatus != null">#{connectionStatus},</if>
             <if test="sshPort != null">#{sshPort},</if>
             <if test="sshUsername != null">#{sshUsername},</if>
+            <if test="sshPassword != null and sshPassword != ''">#{sshPassword},</if>
             <if test="agentPath != null">#{agentPath},</if>
             <if test="agentEnabled != null">#{agentEnabled},</if>
             <if test="remark != null">#{remark},</if>
@@ -150,8 +153,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="connectionStatus != null">connection_status = #{connectionStatus},</if>
             <if test="sshPort != null">ssh_port = #{sshPort},</if>
             <if test="sshUsername != null">ssh_username = #{sshUsername},</if>
-            <if test="agentPath != null">agent_path = #{agentPath},</if>
-            <if test="agentEnabled != null">agent_enabled = #{agentEnabled},</if>
+            <if test="sshPassword != null and sshPassword != ''">ssh_password = #{sshPassword},</if>
+            agent_path = NULL,
+            agent_token = NULL,
+            agent_enabled = '1',
             <if test="remark != null">remark = #{remark},</if>
             <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
             update_time = NOW()
@@ -172,31 +177,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         WHERE id = #{serverId}
     </update>
 
-    <select id="selectAgentHeartbeatTimeoutList" resultMap="MonitorServerResult">
-        <include refid="selectMonitorServerVo"/>
-        WHERE ms.del_flag = '0'
-          AND ms.agent_enabled = '0'
-          AND ms.connection_status = '0'
-          AND (ms.last_collect_time IS NULL OR ms.last_collect_time &lt; DATE_SUB(NOW(), INTERVAL #{timeoutMinutes} MINUTE))
-        ORDER BY ms.last_collect_time ASC
-    </select>
-
-    <update id="updateAgentOffline" parameterType="Long">
+    <update id="updateConnectionFailure" parameterType="Long">
         UPDATE monitor_server
         SET connection_status = '1',
             monitor_status = '1',
             update_time = NOW()
         WHERE id = #{serverId}
           AND del_flag = '0'
-    </update>
-
-    <update id="updateAgentToken">
-        UPDATE monitor_server
-        SET agent_token = #{agentToken},
-            agent_enabled = #{agentEnabled},
-            update_by = #{updateBy},
-            update_time = NOW()
-        WHERE id = #{id} AND del_flag = '0'
     </update>
 
     <delete id="deleteMonitorServerById" parameterType="Long">

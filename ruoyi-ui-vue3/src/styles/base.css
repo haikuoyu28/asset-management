@@ -888,21 +888,22 @@ button {
 }
 
 .login-page {
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(420px, 0.8fr);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
   min-height: 100vh;
-  background: #101820;
+  background:
+    linear-gradient(135deg, rgba(16, 24, 32, 0.96), rgba(20, 53, 72, 0.9)),
+    radial-gradient(circle at 24% 24%, rgba(75, 224, 181, 0.18), transparent 32%),
+    #101820;
 }
 
 .login-visual {
   display: flex;
-  flex-direction: column;
   justify-content: center;
-  padding: 64px;
-  background:
-    linear-gradient(135deg, rgba(16, 24, 32, 0.94), rgba(20, 53, 72, 0.86)),
-    radial-gradient(circle at 24% 24%, rgba(75, 224, 181, 0.18), transparent 32%),
-    #101820;
+  padding: 0 24px;
   color: #ffffff;
 }
 
@@ -910,7 +911,7 @@ button {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 56px;
+  margin: 0;
 }
 
 .login-brand span {
@@ -924,7 +925,7 @@ button {
 }
 
 .login-brand strong {
-  font-size: 18px;
+  font-size: 24px;
 }
 
 .login-visual h1 {
@@ -960,7 +961,6 @@ button {
 }
 
 .login-card {
-  align-self: center;
   width: min(460px, calc(100% - 42px));
   margin: 0 auto;
   padding: 34px;
@@ -971,8 +971,9 @@ button {
 }
 
 .login-card h2 {
-  margin: 0;
+  margin: 0 0 26px;
   font-size: 26px;
+  text-align: center;
 }
 
 .login-card p {
@@ -1373,8 +1374,8 @@ button {
   }
 
   .login-visual {
-    min-height: 420px;
-    padding: 36px 24px;
+    min-height: 0;
+    padding: 0 24px;
   }
 
   .login-visual h1 {

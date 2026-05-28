@@ -1,6 +1,7 @@
 package com.ruoyi.web.controller.monitor;
 
 import java.util.List;
+import java.util.Map;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -72,10 +73,25 @@ public class MonitorServerController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('monitor:server:edit')")
-    @Log(title = "Agent Token", businessType = BusinessType.UPDATE)
-    @PutMapping("/{id}/agent-token")
-    public AjaxResult resetAgentToken(@PathVariable("id") Long id) {
-        return success(monitorServerService.resetAgentToken(id));
+    @Log(title = "SSH连接测试", businessType = BusinessType.UPDATE)
+    @PostMapping("/{id}/test-ssh")
+    public AjaxResult testSshConnection(@PathVariable("id") Long id) {
+        monitorServerService.testSshConnection(id);
+        return success("SSH连接成功");
+    }
+
+    @PreAuthorize("@ss.hasPermi('monitor:server:edit')")
+    @Log(title = "SSH监控采集", businessType = BusinessType.UPDATE)
+    @PostMapping("/{id}/collect")
+    public AjaxResult collect(@PathVariable("id") Long id) {
+        return success(monitorServerService.collectSshMonitorData(id));
+    }
+
+    @PreAuthorize("@ss.hasPermi('monitor:server:edit')")
+    @Log(title = "远程命令下发", businessType = BusinessType.UPDATE)
+    @PostMapping("/{id}/command")
+    public AjaxResult executeCommand(@PathVariable("id") Long id, @RequestBody Map<String, String> body) {
+        return success(monitorServerService.executePresetCommand(id, body.get("commandKey")));
     }
 
     @PreAuthorize("@ss.hasPermi('monitor:server:remove')")

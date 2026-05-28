@@ -1,7 +1,0 @@
-{
-  "serverId": 1,
-  "endpoint": "http://localhost:8080/monitor/data/agent/report",
-  "token": "replace-with-generated-agent-token",
-  "intervalSeconds": 30,
-  "diskPath": "/"
-}

@@ -1,7 +1,9 @@
 package com.ruoyi.system.service;
 
 import java.util.List;
+import java.util.Map;
 import com.ruoyi.system.domain.monitor.MonitorServer;
+import com.ruoyi.system.domain.monitor.MonitorData;
 
 /**
  * 监控服务器Service接口
@@ -22,9 +24,13 @@ public interface IMonitorServerService {
 
     public int updateCollectTime(Long serverId);
 
-    public MonitorServer resetAgentToken(Long id);
+    public void testSshConnection(Long id);
 
-    public int checkAgentHeartbeatTimeout(int timeoutMinutes);
+    public MonitorData collectSshMonitorData(Long id);
+
+    public int collectAllSshMonitorData();
+
+    public Map<String, Object> executePresetCommand(Long id, String commandKey);
 
     public int deleteMonitorServerById(Long id);
 

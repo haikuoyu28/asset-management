@@ -31,10 +31,25 @@ export function updateServer(data) {
   })
 }
 
-export function resetAgentToken(id) {
+export function testSshConnection(id) {
   return request({
-    url: `/monitor/server/${id}/agent-token`,
-    method: 'put'
+    url: `/monitor/server/${id}/test-ssh`,
+    method: 'post'
+  })
+}
+
+export function collectServer(id) {
+  return request({
+    url: `/monitor/server/${id}/collect`,
+    method: 'post'
+  })
+}
+
+export function executeServerCommand(id, commandKey) {
+  return request({
+    url: `/monitor/server/${id}/command`,
+    method: 'post',
+    data: { commandKey }
   })
 }
 
