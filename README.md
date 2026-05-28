@@ -2,7 +2,7 @@
 
 这是一个面向企业 IT 运维场景的资产纳管与监控告警平台。项目基于 RuoYi-Vue 二次开发，当前目标不是继续保留通用后台模板感，而是逐步收敛为“资产中心 + 监控中心 + 告警闭环 + 运维工作台”的产品骨架，为后续 AIOps 能力打底。
 
-当前生产入口仍是稳定的 Vue2 前端 `ruoyi-ui`，同时已启动并行 Vue3 前端 `ruoyi-ui-vue3`。Vue3 版本用于承接新的产品化界面、交互和后续 AIOps 体验，等主流程稳定后再替换默认 Docker 前端。
+当前 Docker 默认前端已经切换到 Vue3 工程 `ruoyi-ui-vue3`，用于承接新的产品化界面、交互和后续 AIOps 体验。旧版 Vue2 工程 `ruoyi-ui` 暂时保留，作为历史参考和必要时的回退来源。
 
 ## 当前阶段
 
@@ -17,7 +17,7 @@
 | 告警事件 | 已完成主流程 | 告警筛选、处理、忽略、闭环记录 |
 | 告警规则 | 已完成主流程 | 阈值规则、范围、等级、沉默时间、启停状态 |
 | Agent 上报 | 已具备基础链路 | Token、心跳、指标上报、离线告警、恢复自动关闭 |
-| Vue3 迁移 | 进行中 | 已有登录、核心运维页面和 Docker 预览入口，暂未切换生产入口 |
+| Vue3 迁移 | 进行中 | 已有登录、核心运维页面、动态菜单、按钮权限，Docker 默认前端已切到 Vue3 |
 
 ## 技术栈
 
@@ -39,15 +39,15 @@ asset-management/
 ├─ ruoyi-generator/          # RuoYi 代码生成模块
 ├─ ruoyi-quartz/             # 定时任务模块
 ├─ ruoyi-system/             # 系统、资产、监控业务模块
-├─ ruoyi-ui/                 # 当前 Vue2 + Element UI 生产前端
-├─ ruoyi-ui-vue3/            # 新版 Vue3 + Vite 并行前端
+├─ ruoyi-ui/                 # 旧版 Vue2 + Element UI 前端，暂时保留
+├─ ruoyi-ui-vue3/            # 当前默认 Vue3 + Vite 前端
 ├─ agent/                    # Agent 相关脚本与说明
 ├─ docs/                     # 阶段文档和迁移记录
 ├─ sql/                      # 数据库初始化脚本
 ├─ docker/                   # Nginx、MySQL、Redis 运行配置
 ├─ docker-compose.yml        # Docker Compose 编排
 ├─ Dockerfile.backend        # 后端镜像构建文件
-├─ Dockerfile.frontend       # 当前 Vue2 前端镜像构建文件
+├─ Dockerfile.frontend       # 当前 Vue3 前端镜像构建文件
 └─ README.md
 ```
 
@@ -81,7 +81,7 @@ docker compose logs -f backend
 后端：http://localhost:8080
 ```
 
-Vue3 预览前端可以通过 Compose override 单独启动：
+如需保留独立 Vue3 预览服务，也可以通过 Compose override 单独启动：
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.vue3.yml up -d --build frontend-vue3
@@ -110,7 +110,7 @@ java -jar ruoyi-admin/target/ruoyi-admin.jar
 http://localhost:8080
 ```
 
-### 当前 Vue2 前端
+### 旧版 Vue2 前端
 
 ```powershell
 cd ruoyi-ui
@@ -158,12 +158,11 @@ Docker MySQL 已挂载 UTF-8 配置，初始化 SQL 顶部也设置了 `SET NAME
 
 迁移采用并行策略：
 
-1. 保留 `ruoyi-ui` 作为当前稳定生产入口。
-2. 在 `ruoyi-ui-vue3` 中迁移登录、工作台、资产、服务器、监控、告警主流程。
-3. 接入动态菜单、权限指令、字典组件和公共 CRUD 能力。
-4. 为 Vue3 前端新增独立 Dockerfile 和 Compose preview 服务。
-5. 验收通过后再替换当前 `frontend` 服务。
-6. 最后移除 Vue2 工程或保留为历史分支。
+1. `frontend` 默认镜像已切换到 `ruoyi-ui-vue3`。
+2. `ruoyi-ui` 暂时保留为旧版参考和回退来源。
+3. Vue3 已接入登录、工作台、核心运维页面、动态菜单和按钮权限。
+4. 后续继续抽象公共组件并迁移必要的平台管理页面。
+5. 验收稳定后移除 Vue2 工程或保留为历史分支。
 
 更多记录见：
 
@@ -182,7 +181,7 @@ docs/VUE3_MIGRATION_PROGRESS.md
 | 指标数据标准化 | 统一 CPU、内存、磁盘、网络、负载、进程、采集时间和数据质量 |
 | 告警闭环标准化 | 形成未处理、处理中、已处理、已忽略的处置记录和结果样本 |
 | Agent 链路稳定 | 稳定注册、Token、心跳、指标上报、离线判断和恢复逻辑 |
-| Vue3 主流程稳定 | 完成核心页面、权限、菜单、字典、Docker preview 和生产切换 |
+| Vue3 主流程稳定 | 完成核心页面、权限、菜单、字典和默认 Docker 前端切换 |
 | AIOps 数据准备 | 为异常检测、告警降噪、根因分析、容量预测准备可用历史数据 |
 
 后续 AIOps 可以逐步引入：

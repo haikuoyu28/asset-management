@@ -2,11 +2,11 @@ FROM node:16-alpine AS builder
 
 WORKDIR /web
 
-COPY ruoyi-ui/package*.json ./
-RUN npm install --legacy-peer-deps
+COPY ruoyi-ui-vue3/package*.json ./
+RUN npm install
 
-COPY ruoyi-ui/ .
-RUN npm run build:prod
+COPY ruoyi-ui-vue3/ .
+RUN npm run build
 
 FROM nginx:1.25-alpine
 

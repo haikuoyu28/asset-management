@@ -1,6 +1,6 @@
 # Vue3 Migration Progress
 
-本文档记录 Vue3 迁移的实际落地进度。当前策略是并行建设新版前端，旧版 `ruoyi-ui` 继续承担生产入口，等新版主流程稳定后再切换 Docker 和默认访问入口。
+本文档记录 Vue3 迁移的实际落地进度。当前 Docker 默认前端已经切换到 `ruoyi-ui-vue3`，旧版 `ruoyi-ui` 暂时保留为历史参考和回退来源。
 
 ## 当前阶段
 
@@ -33,13 +33,12 @@
   - `/monitor/rule`
 - 会话策略：沿用当前 RuoYi 的 `Admin-Token` Cookie
 - 权限策略：已接入 `/getRouters` 生成 Vue3 侧栏菜单，并通过 `v-hasPermi` 控制页面按钮权限
-- 兼容策略：当前 Vue2 前端继续作为生产入口，Vue3 前端作为迁移预览入口
-- 部署策略：新增 `Dockerfile.frontend-vue3` 和 `docker-compose.vue3.yml`，可独立启动 Vue3 预览服务
+- 兼容策略：旧版 Vue2 前端暂时保留，不再作为默认 Docker 入口
+- 部署策略：`Dockerfile.frontend` 已切到 Vue3；`Dockerfile.frontend-vue3` 和 `docker-compose.vue3.yml` 保留为独立预览入口
 - UI 策略：参考 Wuhr-AI-ops 的浅色 AIOps 控制台风格，使用白色侧栏、顶部工具栏、浅蓝灰背景和卡片式业务面板
 
 ## 本阶段不做
 
-- 不替换当前生产 Docker 前端
 - 不删除 `ruoyi-ui`
 - 不迁移全部 RuoYi 系统管理页面
 - 不切换 Docker 默认前端
@@ -51,7 +50,7 @@
 2. 迁移系统管理必要页面：用户、角色、菜单、操作日志、登录日志。
 3. 强化资产选择器、服务器选择器和表单校验。
 4. 补齐未实现菜单的 Vue3 页面或隐藏不可用入口。
-5. 验收通过后再替换当前 `frontend` 服务。
+5. 观察默认 Vue3 前端运行稳定性，确认后移除或归档旧版 Vue2 前端。
 6. 开始 AIOps 数据建模、异常检测和智能告警降噪。
 
 ## 本地验证
