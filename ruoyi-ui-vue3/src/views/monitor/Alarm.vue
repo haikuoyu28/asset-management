@@ -37,8 +37,8 @@
         <el-table-column label="告警时间" min-width="170" prop="alarmTime" />
         <el-table-column fixed="right" label="操作" width="180">
           <template #default="{ row }">
-            <el-button :disabled="row.alarmStatus === '2'" link type="primary" @click="openHandle(row)">处理</el-button>
-            <el-button :disabled="row.alarmStatus === '2' || row.alarmStatus === '3'" link type="info" @click="ignoreRow(row)">忽略</el-button>
+            <el-button v-hasPermi="['monitor:alarm:handle']" :disabled="row.alarmStatus === '2'" link type="primary" @click="openHandle(row)">处理</el-button>
+            <el-button v-hasPermi="['monitor:alarm:handle']" :disabled="row.alarmStatus === '2' || row.alarmStatus === '3'" link type="info" @click="ignoreRow(row)">忽略</el-button>
           </template>
         </el-table-column>
       </el-table>

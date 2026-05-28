@@ -9,6 +9,9 @@ export const useUserStore = defineStore('user', {
     roles: [],
     permissions: []
   }),
+  getters: {
+    isLoaded: state => Boolean(state.name || state.roles.length || state.permissions.length)
+  },
   actions: {
     setLoginToken(token) {
       this.token = token

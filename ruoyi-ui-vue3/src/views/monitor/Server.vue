@@ -6,7 +6,7 @@
         <h1>服务器管理</h1>
         <p>维护资产关联、Agent 接入状态、连接状态和最近采集时间，为后续智能诊断提供可信对象。</p>
       </div>
-      <el-button type="primary" @click="openForm()">新增服务器</el-button>
+      <el-button v-hasPermi="['monitor:server:add']" type="primary" @click="openForm()">新增服务器</el-button>
     </div>
 
     <div class="module-panel">
@@ -44,9 +44,9 @@
         <el-table-column label="最近采集" min-width="170" prop="lastCollectTime" />
         <el-table-column fixed="right" label="操作" width="250">
           <template #default="{ row }">
-            <el-button link type="primary" @click="openForm(row)">编辑</el-button>
-            <el-button link type="success" @click="resetToken(row)">重置 Token</el-button>
-            <el-button link type="danger" @click="removeRow(row)">删除</el-button>
+            <el-button v-hasPermi="['monitor:server:edit']" link type="primary" @click="openForm(row)">编辑</el-button>
+            <el-button v-hasPermi="['monitor:server:edit']" link type="success" @click="resetToken(row)">重置 Token</el-button>
+            <el-button v-hasPermi="['monitor:server:remove']" link type="danger" @click="removeRow(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>

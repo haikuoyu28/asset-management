@@ -6,7 +6,7 @@
         <h1>设备资产</h1>
         <p>先把服务器、网络、安全和终端资产统一入库，再把服务器类资产纳入监控链路。</p>
       </div>
-      <el-button type="primary" @click="openForm()">新增资产</el-button>
+      <el-button v-hasPermi="['asset:info:add']" type="primary" @click="openForm()">新增资产</el-button>
     </div>
 
     <div class="module-panel">
@@ -37,9 +37,9 @@
         <el-table-column label="位置" min-width="150" prop="location" />
         <el-table-column fixed="right" label="操作" width="250">
           <template #default="{ row }">
-            <el-button link type="primary" @click="openForm(row)">编辑</el-button>
-            <el-button :disabled="row.assetType !== '1'" link type="success" @click="includeMonitor(row)">纳入监控</el-button>
-            <el-button link type="danger" @click="removeRow(row)">删除</el-button>
+            <el-button v-hasPermi="['asset:info:edit']" link type="primary" @click="openForm(row)">编辑</el-button>
+            <el-button v-hasPermi="['monitor:server:add']" :disabled="row.assetType !== '1'" link type="success" @click="includeMonitor(row)">纳入监控</el-button>
+            <el-button v-hasPermi="['asset:info:remove']" link type="danger" @click="removeRow(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>

@@ -6,7 +6,7 @@
         <h1>告警规则</h1>
         <p>将阈值、范围、沉默时间和告警等级结构化，后续才能做智能降噪和规则推荐。</p>
       </div>
-      <el-button type="primary" @click="openForm()">新增规则</el-button>
+      <el-button v-hasPermi="['monitor:rule:add']" type="primary" @click="openForm()">新增规则</el-button>
     </div>
 
     <div class="module-panel">
@@ -33,8 +33,8 @@
         <el-table-column label="状态" width="90"><template #default="{ row }"><el-tag :type="row.enabled === '1' ? 'success' : 'info'">{{ row.enabled === '1' ? '启用' : '停用' }}</el-tag></template></el-table-column>
         <el-table-column fixed="right" label="操作" width="160">
           <template #default="{ row }">
-            <el-button link type="primary" @click="openForm(row)">编辑</el-button>
-            <el-button link type="danger" @click="removeRow(row)">删除</el-button>
+            <el-button v-hasPermi="['monitor:rule:edit']" link type="primary" @click="openForm(row)">编辑</el-button>
+            <el-button v-hasPermi="['monitor:rule:remove']" link type="danger" @click="removeRow(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>

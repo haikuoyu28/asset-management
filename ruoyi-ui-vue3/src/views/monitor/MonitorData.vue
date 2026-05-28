@@ -26,7 +26,7 @@
         <el-table-column label="进程数" width="100" prop="runningProcesses" />
         <el-table-column label="采集时间" min-width="170" prop="collectTime" />
         <el-table-column fixed="right" label="操作" width="90">
-          <template #default="{ row }"><el-button link type="danger" @click="removeRow(row)">删除</el-button></template>
+          <template #default="{ row }"><el-button v-hasPermi="['monitor:data:remove']" link type="danger" @click="removeRow(row)">删除</el-button></template>
         </el-table-column>
       </el-table>
       <el-pagination v-model:current-page="query.pageNum" v-model:page-size="query.pageSize" :total="total" background layout="total, sizes, prev, pager, next" @current-change="loadList" @size-change="loadList" />

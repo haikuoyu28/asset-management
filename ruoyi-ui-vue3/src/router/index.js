@@ -9,6 +9,8 @@ import MonitorData from '@/views/monitor/MonitorData.vue'
 import Alarm from '@/views/monitor/Alarm.vue'
 import Rule from '@/views/monitor/Rule.vue'
 import { hasToken } from '@/utils/auth'
+import { usePermissionStore } from '@/stores/permission'
+import { useUserStore } from '@/stores/user'
 
 const routes = [
   {
@@ -74,12 +76,20 @@ const router = createRouter({
   scrollBehavior: () => ({ top: 0 })
 })
 
-router.beforeEach(to => {
+router.beforeEach(async to => {
   if (to.path !== '/login' && !hasToken()) {
     return { path: '/login', query: { redirect: to.fullPath } }
   }
   if (to.path === '/login' && hasToken()) {
     return { path: '/index' }
+  }
+  if (to.path !== '/login') {
+    const user = useUserStore()
+    const permission = usePermissionStore()
+    if (!user.isLoaded) {
+      await user.loadUserInfo().catch(() => {})
+    }
+    await permission.loadMenus()
   }
   return true
 })
